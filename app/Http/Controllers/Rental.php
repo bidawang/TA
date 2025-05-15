@@ -6,21 +6,26 @@ use App\Models\Rental_M;
 use App\Models\Alamat_M;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class Rental extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
 {
-    $rentals = Rental_M::with(['alamat', 'ratings'])->get();
+     $query = Rental_M::with(['alamat', 'ratings']);
 
-    // Hitung dan tambahkan properti rating ke setiap rental
-    foreach ($rentals as $rental) {
-        $rental->ratings_avg_rating = $rental->averageRating() ?? 0;
-    }
+    if (!empty($request->search)) {
+    $query->where('nama', 'like', '%' . $request->search . '%');
+}
 
-    // Ambil 3 rental dengan rating tertinggi
-    $topRentals = $rentals->sortByDesc('ratings_avg_rating')->take(3);
 
+    $rentals = $query->get();
+
+    $topRentals = Rental_M::withAvg('ratings', 'rating')
+        ->orderByDesc('ratings_avg_rating')
+        ->take(5)
+        ->get();
+// dd($request);
     return view('welcome', compact('rentals', 'topRentals'));
 }
 
@@ -159,7 +164,7 @@ $rentals = Rental_M::with(['alamat', 'ratings'])->get();
 }
 
 
-    public function show($id)
+    public function showsss($id)
 {
     // Ambil rental berdasarkan ID yang diberikan beserta alamat dan ratings terkait
     $rental = Rental_M::with(['alamat', 'ratings'])->findOrFail($id);
@@ -169,6 +174,37 @@ $rentals = Rental_M::with(['alamat', 'ratings'])->get();
 
     // Kembalikan data rental ke view 'rental.show'
     return view('rental.show', compact('rental'));
+}
+
+
+public function show($id)
+{
+    $rental = Rental_M::with(['alamat', 'fasilitas', 'galeri'])->findOrFail($id);
+    $rental->ratings_avg_rating = $rental->ratings()->avg('rating') ?? 0;
+
+    $carousel1 = $rental->fasilitas;
+    $carousel2 = $rental->galeri;
+
+    $user = Auth::user();
+
+    // Ambil semua rating dengan user
+    $allRatings = $rental->ratings()->with('user')->latest()->get();
+
+    // Pisahkan rating user login (jika ada)
+    $userRating = null;
+    $otherRatings = $allRatings;
+
+    if ($user) {
+        $userRating = $allRatings->firstWhere('user_id', $user->google_id);
+        $otherRatings = $allRatings->filter(fn($r) => $r->user_id !== $user->google_id);
+    }
+
+    // Gabungkan: userRating di atas, sisanya di bawah
+    $ratings = collect();
+    if ($userRating) $ratings->push($userRating);
+    $ratings = $ratings->merge($otherRatings)->take(10); // ambil 10 teratas manual
+
+    return view('rental.show', compact('rental', 'carousel1', 'carousel2', 'ratings', 'userRating'));
 }
 
 

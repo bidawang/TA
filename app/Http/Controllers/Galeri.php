@@ -32,27 +32,23 @@ class Galeri extends Controller
 
     // Menyimpan galeri baru
     public function store(Request $request)
-    {
+{
+    $fotoPath = $request->hasFile('foto_fasilitas')
+        ? $request->file('foto_fasilitas')->store('galeri_foto', 'public')
+        : null;
 
-        // Proses upload foto
-        if ($request->hasFile('foto_fasilitas')) {
-            $fotoPath = $request->file('foto_fasilitas')->store('galeri_foto', 'public');
-        } else {
-            $fotoPath = null;
-        }
+    Galeri_M::create([
+        'nama_foto' => $request->nama_foto,
+        'deskripsi' => $request->deskripsi,
+        'carousel' => $request->carousel,
+        'id_rental' => $request->rental_id,
+        'google_id' => $request->google_id,
+        'foto_fasilitas' => $fotoPath,
+    ]);
 
-        // Menyimpan data galeri
-        Galeri_M::create([
-            'nama_foto' => $request->nama_foto,
-            'deskripsi' => $request->deskripsi,
-            'carousel' => $request->carousel,
-            'id_rental' => $request->rental_id,
-            'google_id' => $request->google_id,
-            'foto_fasilitas' => $fotoPath,
-        ]);
+    return redirect()->route('galeri.index', ['rental_id' => $request->rental_id]);
+}
 
-        return redirect()->route('galeri.index', ['rental_id' => $request->rental_id]);
-    }
 
     // Menampilkan detail galeri
     public function show($id)
@@ -72,31 +68,29 @@ class Galeri extends Controller
 
     // Mengupdate data galeri
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'nama_foto' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'carousel' => 'required|boolean',
-        ]);
+{
+    $request->validate([
+        'nama_foto' => 'required|string|max:255',
+        'deskripsi' => 'nullable|string',
+        'carousel' => 'required|boolean',
+    ]);
 
-        $galeri = Galeri_M::findOrFail($id);
+    $galeri = Galeri_M::findOrFail($id);
 
-        // Proses upload foto
-        if ($request->hasFile('foto_fasilitas')) {
-            $fotoPath = $request->file('foto_fasilitas')->store('galeri_foto', 'public');
-            $galeri->foto_fasilitas = $fotoPath;
-        }
-
-        // Update data galeri
-        $galeri->update([
-            'nama_foto' => $request->nama_foto,
-            'deskripsi' => $request->deskripsi,
-            'carousel' => $request->carousel,
-            'google_id' => $request->google_id,
-        ]);
-
-        return redirect()->route('galeri.index', ['rental_id' => $galeri->id_rental]);
+    if ($request->hasFile('foto_fasilitas')) {
+        $fotoPath = $request->file('foto_fasilitas')->store('galeri_foto', 'public');
+        $galeri->foto_fasilitas = $fotoPath;
     }
+
+    $galeri->nama_foto = $request->nama_foto;
+    $galeri->deskripsi = $request->deskripsi;
+    $galeri->carousel = $request->carousel;
+    $galeri->google_id = $request->google_id;
+    $galeri->save();
+
+    return redirect()->route('galeri.index', ['rental_id' => $galeri->id_rental]);
+}
+
 
     // Menghapus galeri
     public function destroy($id)

@@ -1,7 +1,10 @@
 @extends('layout')
 
 @section('content')
+
 <div class="container py-4">
+
+    <h5 class="mb-3">Top Rental</h5>
 
     {{-- Slide show rental dengan rating tertinggi --}}
     <div id="topRentalCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
@@ -32,6 +35,18 @@
     </div>
 
     {{-- Daftar semua rental --}}
+    <form method="GET" action="{{ route('dashboard') }}" class="mb-4">
+    <div class="row g-2">
+        <div class="col-md-10">
+            <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Cari nama rental...">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-search"></i> Cari
+            </button>
+        </div>
+    </div>
+</form>
     <h5 class="mb-3">Semua Rental PS</h5>
     <div class="row">
         @forelse ($rentals as $rental)

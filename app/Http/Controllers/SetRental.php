@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Http;
 
 use App\Models\SetRental_M;
 use App\Models\TV_M;
@@ -9,20 +10,45 @@ use Illuminate\Http\Request;
 
 class SetRental extends Controller
 {
-    public function index(Request $request)
-    {
-        $rental_id = $request->query('rental_id');
+    public function getTripayChannels()
+{
+    $apiKey = env('TRIPAY_API_KEY');
 
-        $query = SetRental_M::with(['tv', 'ps']);
+    $response = Http::withHeaders([
+        'Authorization' => "Bearer $apiKey"
+    ])->get('https://tripay.co.id/api-sandbox/merchant/payment-channel');
 
-        if ($rental_id) {
-            $query->where('rental_id', $rental_id);
-        }
-
-        $setRentals = $query->get();
-
-        return view('setrental.index', compact('setRentals', 'rental_id'));
+    if ($response->successful()) {
+        // Mengambil data channel pembayaran
+        return $response->json()['data'];
     }
+
+    return []; // fallback jika gagal
+}
+    public function index(Request $request)
+{
+    $rental_id = $request->query('rental_id');
+
+    $query = SetRental_M::with(['tv', 'ps', 'rental']);
+
+    if ($rental_id) {
+        $query->where('rental_id', $rental_id);
+    }
+
+    $setRentals = $query->get();
+
+    // Panggil Tripay
+    $channels = $this->getTripayChannels();
+// dd($channels);
+    // Kirim ke view
+    return view('setrental.index', [
+        'setRentals' => $setRentals,
+        'rental_id' => $rental_id,
+        'tripayChannels' => $channels,
+        'userGoogleId' => auth()->user()->google_id ?? null,
+    ]);
+}
+
 
     public function create(Request $request)
     {

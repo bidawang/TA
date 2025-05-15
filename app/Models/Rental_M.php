@@ -31,7 +31,7 @@ class Rental_M extends Model
     // jika ingin relasi ke user berdasarkan google_id
     public function user()
     {
-        return $this->belongsTo(User_M::class, 'google_id', 'google_id');
+        return $this->belongsTo(User::class, 'google_id');
     }
 
     public function setRental()
@@ -48,6 +48,16 @@ class Rental_M extends Model
     public function averageRating()
 {
     return $this->ratings()->avg('rating');
+}
+
+public function fasilitas()
+{
+    return $this->hasMany(Fasilitas_M::class, 'id_rental');
+}
+
+public function galeri()
+{
+    return $this->hasMany(Galeri_M::class, 'id_rental');
 }
     
 }

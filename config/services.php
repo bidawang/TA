@@ -35,7 +35,15 @@ return [
     'client_id' => env('GOOGLE_CLIENT_ID'),
     'client_secret' => env('GOOGLE_CLIENT_SECRET'),
     'redirect' => env('GOOGLE_REDIRECT_URI'),
-],
+    ],
+
+    'tripay' => [
+    'api_key' => env('TRIPAY_API_KEY'),
+    'merchant_code' => env('TRIPAY_MERCHANT_CODE'),
+    'private_key' => env('TRIPAY_PRIVATE_KEY'),
+    'callback_url' => env('TRIPAY_CALLBACK_URL'),
+    ],
+
 
 
 ];

@@ -15,6 +15,7 @@ class Galeri_M extends Model
         'nama_foto',
         'deskripsi',
         'carousel',
+        'foto_fasilitas',
         'id_rental',
         'google_id',
     ];
