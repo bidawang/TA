@@ -27,5 +27,8 @@ class Transaksi_M extends Model
 {
     return $this->hasOne(Pembayaran_M::class, 'transaksi_id', 'id_transaksi');
 }
+public function setRental(){
+    return $this->hasOne(SetRental_M::class, 'id', 'id_set_rental');
+}
 
 }

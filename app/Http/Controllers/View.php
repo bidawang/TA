@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http; // untuk HTTP client Laravel
+use Illuminate\Support\Facades\Http;
 use App\Models\Transaksi_M;
 use App\Models\Rental_M;
 
@@ -15,8 +15,8 @@ class View extends Controller
 
     public function __construct()
     {
-        $this->tripayApiKey = env('TRIPAY_API_KEY'); // simpan di .env
-        $this->tripayApiUrl = 'https://tripay.co.id/api'; // endpoint base
+        $this->tripayApiKey = env('TRIPAY_API_KEY');
+        $this->tripayApiUrl = 'https://tripay.co.id/api-sandbox';
     }
 
     public function index()
@@ -24,11 +24,11 @@ class View extends Controller
         $user = Auth::user();
 
         if ($user->role === 'developer') {
-            $transaksi = Transaksi_M::with('pembayaran')->latest()->get();
+            $transaksi = Transaksi_M::with('pembayaran','setRental')->latest()->get();
         } elseif ($user->role === 'admin') {
             $rental = Rental_M::where('google_id', $user->google_id)->first();
 
-            $transaksi = Transaksi_M::with('pembayaran')
+            $transaksi = Transaksi_M::with('pembayaran','setRental')
                 ->where('id_rental', $rental->id_rental)
                 ->latest()
                 ->get();
@@ -36,20 +36,19 @@ class View extends Controller
             abort(403, 'Unauthorized role');
         }
 
-        // Ambil data transaksi dari Tripay berdasarkan merchant_ref
         $transaksiTripay = [];
 
         foreach ($transaksi as $tx) {
-            if (!empty($tx->pembayaran->merchant_ref)) {
+            if (!empty($tx->pembayaran?->reference)) {
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $this->tripayApiKey,
                     'Accept' => 'application/json'
-                ])->get($this->tripayApiUrl . '/transaction/list', [
-                    'merchant_ref' => $tx->pembayaran->merchant_ref
+                ])->get($this->tripayApiUrl . '/transaction/detail', [
+                    'reference' => $tx->pembayaran->reference
                 ]);
 
-                if ($response->successful() && isset($response['data'][0])) {
-                    $transaksiTripay[$tx->id_transaksi] = $response['data'][0];
+                if ($response->successful() && isset($response['data'])) {
+                    $transaksiTripay[$tx->id_transaksi] = $response['data'];
                 }
             }
         }
@@ -60,19 +59,18 @@ class View extends Controller
     public function show($id)
     {
         $transaksi = Transaksi_M::with('pembayaran')->findOrFail($id);
-
         $tripayData = null;
 
-        if (!empty($transaksi->pembayaran->merchant_ref)) {
+        if (!empty($transaksi->pembayaran?->reference)) {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->tripayApiKey,
                 'Accept' => 'application/json'
-            ])->get($this->tripayApiUrl . '/transaction/list', [
-                'merchant_ref' => $transaksi->pembayaran->merchant_ref
+            ])->get($this->tripayApiUrl . '/transaction/detail', [
+                'reference' => $transaksi->pembayaran->reference
             ]);
 
-            if ($response->successful() && isset($response['data'][0])) {
-                $tripayData = $response['data'][0];
+            if ($response->successful() && isset($response['data'])) {
+                $tripayData = $response['data'];
             }
         }
 
