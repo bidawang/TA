@@ -76,4 +76,28 @@ class View extends Controller
 
         return view('riwayat.show', compact('transaksi', 'tripayData'));
     }
+
+    public function pendapatan($id, Request $request)
+{
+    $rental = Rental_M::with('alamat')->findOrFail($id);
+
+    $query = Transaksi_M::where('id_rental', $id);
+
+    // Filter berdasarkan tanggal
+    if ($request->has('start') && $request->has('end')) {
+        $start = $request->start;
+        $end = $request->end;
+        $query->whereBetween('created_at', [$start, $end]);
+        $filterLabel = "Custom: $start s.d. $end";
+    } else {
+        $query->whereDate('created_at', now()->toDateString());
+        $filterLabel = "Hari Ini (" . now()->format('d M Y') . ")";
+    }
+
+    $totalPendapatan = $query->sum('total');
+    $transaksis = $query->latest()->get();
+
+    return view('pendapatan.index', compact('rental', 'totalPendapatan', 'transaksis', 'filterLabel'));
+}
+
 }

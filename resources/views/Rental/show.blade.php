@@ -188,6 +188,9 @@ class="carousel-img d-block rounded mx-auto"
     <a href="{{ route('galeri.index', ['rental_id' => $rental->id]) }}" class="btn-sm btn btn-outline-danger flex-fill text-center">
         <i class="bi bi-images me-1"></i> Galeri
     </a>
+<a href="{{ route('pendapatan', ['id' => $rental->id]) }}" class="btn-sm btn btn-outline-danger flex-fill text-center">
+        <i class="bi bi-images me-1"></i> Galeri
+    </a>
 </div>
 
 </div>

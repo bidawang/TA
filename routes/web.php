@@ -49,4 +49,8 @@ Route::post('/tripay/callback', [Tripay::class, 'handle'])->name('tripay.callbac
 
 Route::resource('riwayat', View::class);
 
+Route::get('/pendapatan/{id}', [View::class, 'pendapatan'])->name('pendapatan');
+
+Route::get('pendapatan/custom', [View::class, 'pendapatanCustom'])->name('pendapatan.Custom');
+
 
