@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\Pembayaran_M;
 use Carbon\Carbon;
 
-class TripayCallbackController extends Controller
+class Tripay extends Controller
 {
     public function handle(Request $request)
 {

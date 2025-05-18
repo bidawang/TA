@@ -1,38 +1,69 @@
 @extends('layout')
 
 @section('content')
-<h1 class="mb-4">Daftar SetRental</h1>
-@error('tripay')
-    <div class="alert alert-danger">{{ $message }}</div>
-@enderror
+<h1 class="mb-3 fs-4">Daftar SetRental</h1>
 
-<a href="{{ route('setrental.create', ['rental_id' => $rental_id]) }}" class="btn btn-primary mb-4">➕ Tambah SetRental</a>
+@if ($errors->any())
+    <div class="alert alert-danger py-2 px-3 small">
+      <ul class="mb-0">
+        @foreach ($errors->all() as $error)
+          <li>{{ $error }}</li>
+        @endforeach
+      </ul>
+    </div>
+@endif
 
-<div class="row">
+<a href="{{ route('setrental.create', ['rental_id' => $rental_id]) }}" class="btn btn-primary mb-3 btn-sm">➕ Tambah SetRental</a>
+
+<div class="list-group">
   @foreach ($setRentals as $setRental)
-  <div class="col-md-4">
-    <div class="card shadow-sm mb-4">
-      <div class="card-body">
-        <h5 class="card-title">{{ $setRental->name }}</h5>
-        <p class="card-text"><strong>TV:</strong> {{ $setRental->tv->merek ?? 'Tidak ada TV' }}</p>
-        <p class="card-text"><strong>PS:</strong> {{ $setRental->ps->model_ps ?? 'Tidak ada PS' }}</p>
-        <p class="card-text"><strong>Harga per jam:</strong> Rp {{ number_format($setRental->harga_per_jam, 0, ',', '.') }}</p>
+  <div class="list-group-item list-group-item-action d-flex align-items-center gap-3 p-2 mt-2">
+  
+  {{-- Foto kiri --}}
+  <div style="flex-shrink: 0; width: 80px; height: 80px; overflow: hidden; border-radius: .375rem;">
+    <img src="{{ $setRental->foto ? asset('storage/'.$setRental->foto) : asset('images/placeholder.png') }}" 
+         alt="{{ $setRental->name }}" 
+         class="w-100 h-100" 
+         style="object-fit: cover; object-position: center;">
+  </div>
 
-        <div class="d-flex flex-wrap gap-2 mt-3">
-          <a href="{{ route('ps.show', $setRental->ps_id) }}" class="btn btn-sm btn-success">🎮 Game</a>
-          <a href="{{ route('setrental.show', $setRental->id) }}" class="btn btn-sm btn-info">ℹ️ Detail</a>
-          <a href="{{ route('setrental.edit', $setRental->id) }}" class="btn btn-sm btn-warning">✏️ Edit</a>
-          <form action="{{ route('setrental.destroy', $setRental->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
-            @csrf
-            @method('DELETE')
-            <button class="btn btn-sm btn-danger">🗑️ Hapus</button>
-          </form>
-          <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#pakaiModal{{ $setRental->id }}">🚀 Pakai</button>
-          <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#bookingModal{{ $setRental->id }}">🛒 Booking</button>
-        </div>
+  {{-- Konten tengah (Nama, Data, Tombol edit/hapus/detail) --}}
+  <div class="flex-grow-1 d-flex flex-column justify-content-between" style="min-width: 0;">
+    {{-- Nama full width --}}
+    <h5 class="mb-2 fs-6 text-primary">{{ $setRental->name }}</h5>
+    
+    {{-- Data TV, PS, Harga dan tombol edit/hapus/detail di bawah --}}
+    <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 0.5rem;">
+      
+      {{-- Data (TV, PS, Harga) --}}
+      <div class="text-truncate small" style="min-width: 200px;">
+        <p class="mb-1"><strong>TV:</strong> {{ $setRental->tv->merek ?? '-' }}</p>
+        <p class="mb-1"><strong>PS:</strong> {{ $setRental->ps->model_ps ?? '-' }}</p>
+        <p class="mb-0 fw-semibold text-success">Rp {{ number_format($setRental->harga_per_jam, 0, ',', '.') }}/jam</p>
+      </div>
+      
+      {{-- Tombol Edit, Hapus, Detail sejajar horizontal --}}
+      <div class="btn-group btn-group-sm" role="group" aria-label="CRUD Buttons">
+      <form action="{{ route('setrental.destroy', $setRental->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')" class="d-inline">
+          @csrf
+          @method('DELETE')
+          <button class="btn btn-sm btn-danger" type="submit" title="Hapus 🗑️">🗑️ Hapus</button>
+        </form>
       </div>
     </div>
   </div>
+
+  {{-- Tombol pakai dan booking kanan, vertikal --}}
+  <div class="d-flex flex-column gap-1 flex-shrink-0" style="min-width: 90px;">
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#pakaiModal{{ $setRental->id }}" title="Pakai 🚀">🚀</button>
+    <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#bookingModal{{ $setRental->id }}" title="Booking 🛒">🛒</button>
+    <a href="{{ route('setrental.show', $setRental->id) }}" class="btn btn-sm btn-info" title="Detail ℹ️">ℹ️</a>
+    <a href="{{ route('setrental.edit', $setRental->id) }}" class="btn btn-sm btn-warning" title="Edit ✏️">✏️</a>
+        
+
+  </div>
+  
+</div>
 
   <!-- Modal Pakai Sekarang -->
  <div class="modal fade" id="pakaiModal{{ $setRental->id }}" tabindex="-1" aria-labelledby="pakaiModalLabel{{ $setRental->id }}" aria-hidden="true">

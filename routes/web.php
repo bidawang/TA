@@ -13,6 +13,7 @@ use App\Http\Controllers\User_C;
 use App\Http\Controllers\Transaksi;
 use App\Http\Controllers\Tripay;
 use App\Http\Controllers\View;
+use App\Http\Controllers\Wallet;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -48,6 +49,10 @@ Route::post('/logout', [Google::class, 'logout'])->name('logout');
 Route::post('/tripay/callback', [Tripay::class, 'handle'])->name('tripay.callback');
 
 Route::resource('riwayat', View::class);
+Route::resource('wallet', Wallet::class);
+Route::post('wallet/withdraw', [Wallet::class, 'tariktunai'])
+    ->name('wallet.withdraw');  // pastikan hanya user yg login bisa akses
+    Route::put('/wallet/update-status/{id}', [Wallet::class, 'updateStatus'])->name('wallet.updateStatus')->middleware('auth');
 
 Route::get('/pendapatan/{id}', [View::class, 'pendapatan'])->name('pendapatan');
 

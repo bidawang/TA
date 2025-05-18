@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\User;
+use App\Models\Wallet_M;
 use Illuminate\Http\Request;
 
 class User_C extends Controller
@@ -57,9 +58,10 @@ public function profile($google_id)
 {
     // Ambil data user berdasarkan google_id
     $user = User::where('google_id', $google_id)->firstOrFail();
+    $wallets = Wallet_M::where('google_id', $user->google_id)->get();
 
     // Kirim data user ke view
-    return view('user.profile', compact('user'));
+    return view('user.profile', compact('user','wallets'));
 }
 
 }

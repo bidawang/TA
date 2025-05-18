@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use App\Models\Transaksi_M;
 use App\Models\Rental_M;
+use App\Models\UserWallet_M;
+use App\Models\WalletLogs_M;
+use App\Models\Wallet_M;
 
 class View extends Controller
 {
@@ -80,10 +83,11 @@ class View extends Controller
     public function pendapatan($id, Request $request)
 {
     $rental = Rental_M::with('alamat')->findOrFail($id);
+    $googleId = $rental->google_id ?? null;
 
     $query = Transaksi_M::where('id_rental', $id);
 
-    // Filter berdasarkan tanggal
+    // Filter tanggal
     if ($request->has('start') && $request->has('end')) {
         $start = $request->start;
         $end = $request->end;
@@ -95,9 +99,39 @@ class View extends Controller
     }
 
     $totalPendapatan = $query->sum('total');
-    $transaksis = $query->latest()->get();
 
-    return view('pendapatan.index', compact('rental', 'totalPendapatan', 'transaksis', 'filterLabel'));
+    // Paginate dengan mempertahankan query string
+    $transaksis = $query->latest()->paginate(5)->withQueryString();
+
+    // Ambil saldo dompet user
+    $userWallet = null;
+    if ($googleId) {
+        $userWallet = UserWallet_M::where('google_id', $googleId)
+                                  ->where('id_rental', $id)
+                                  ->first();
+    }
+
+    // Ambil log dompet
+    $walletLogs = WalletLogs_M::where('id_rental', $id)
+                               ->orderByDesc('created_at')
+                               ->get();
+
+    // Metode penarikan
+    $withdrawMethods = Wallet_M::where('id_rental', $id)
+                                ->where('google_id', $googleId)
+                                ->get();
+
+    return view('pendapatan.index', compact(
+        'rental',
+        'totalPendapatan',
+        'transaksis',
+        'filterLabel',
+        'userWallet',
+        'walletLogs',
+        'withdrawMethods'
+    ));
 }
+
+
 
 }

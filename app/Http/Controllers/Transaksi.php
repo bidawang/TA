@@ -7,9 +7,12 @@ use App\Models\Transaksi_M;
 use App\Models\SetRental_M;
 use App\Models\Rental_M;
 use App\Models\Tripay_M;
+use App\Models\UserWallet_M;
+use App\Models\WalletLogs_M;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class Transaksi extends Controller
@@ -113,16 +116,44 @@ class Transaksi extends Controller
 
     if ($tripayResponse->successful()) {
         $data = $tripayResponse->json()['data'];
-
+    
         Tripay_M::create([
             'transaksi_id'   => $transaksi->id_transaksi,
             'merchant_ref'   => $data['merchant_ref'],
             'reference'      => $data['reference'],
             'checkout_url'   => $data['checkout_url'],
         ]);
-
+    
+        if ($jenis === 'booking') {
+            $ownerGoogleId = $rental->google_id;  // google_id pemilik rental
+    
+            // Ambil atau buat wallet berdasarkan google_id pemilik rental dan id_rental
+            $wallet = \App\Models\UserWallet_M::firstOrCreate(
+                [
+                    'google_id' => $ownerGoogleId,
+                    'id_rental' => $idRental,
+                ],
+                [
+                    'balance' => 0,
+                ]
+            );
+    
+            // Tambah saldo wallet
+            $wallet->increment('balance', $totalHarga);
+    
+            // Tambah log wallet
+            \App\Models\WalletLogs_M::create([
+                'google_id' => Auth::user()->google_id,
+                'id_rental' => $idRental,
+                'amount'    => $totalHarga,
+                'type'      => 'in',
+                'note'      => 'Saldo dari booking online (ID #' . $transaksi->id_transaksi . ')',
+            ]);
+        }
+    
         return redirect()->away($data['checkout_url']);
-    } else {
+    }
+     else {
         $transaksi->delete();
 
         $errorMessage = $tripayResponse->json()['message'] ?? 'Gagal membuat transaksi pembayaran. Silakan coba lagi nanti.';

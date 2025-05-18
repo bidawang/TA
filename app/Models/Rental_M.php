@@ -15,11 +15,10 @@ class Rental_M extends Model
         'logo',
         'id_alamat',
         'nik',
+        'no_hp',
         'google_id',
         'deskripsi',
-        'rating',
-        'latitude',
-        'longitude',
+        'status',
     ];
 
     // relasi ke tabel alamat (misalnya)

@@ -12,6 +12,7 @@
   <!-- Select2 -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -97,7 +98,7 @@
     @auth
     <div class="dropdown">
       <a href="#" class="text-dark dropdown-toggle d-flex align-items-center" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-        <img src="{{ Auth::user()->avatar }}" alt="Avatar" class="rounded-circle" width="32" height="32" referrerpolicy="no-referrer">
+<img src="{{ Auth::user()->avatar }}" alt="Avatar" class="rounded-circle" width="32" height="32" referrerpolicy="no-referrer">
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
         <li><a class="dropdown-item" href="{{ route('user.profile', Auth::user()->google_id) }}">Profil</a></li>
@@ -123,20 +124,74 @@
 </div>
 
 <!-- Bottom Navigation -->
-<div class="bottom-nav">
-  <a href="{{ route('rental.index') }}"><i class="bi bi-shop"></i><br/>Rental</a>
-  <a href="{{ route('user.index') }}"><i class="bi bi-people"></i><br/>User</a>
-  <a href="#"><i class="bi bi-house-door"></i><br/>Home</a>
-<a href="#"><i class="bi bi-cash-stack"></i><br/>Pendapatan</a>
-<a href="{{ route('riwayat.index')}}"><i class="bi bi-clock-history"></i><br/>Riwayat</a>
+@if(auth()->check() && (auth()->user()->role === 'developer' || auth()->user()->role === 'admin'))
 
+<div class="bottom-nav d-flex justify-content-around bg-white shadow-sm py-2 fixed-bottom">
+  @if(auth()->user()->role === 'admin')
+
+  <a href="{{ route('setrental.index', ['id' => session('id_rental')]) }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-gear fs-4"></i><br/>
+    <small>Set Rental</small>
+  </a>
+
+  <a href="{{ route('rental.show', ['rental' => session('id_rental')]) }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-house-door fs-4"></i><br/>
+    <small>Home</small>
+  </a>
+
+  <a href="{{ route('pendapatan', ['id' => session('id_rental')]) }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-cash-stack fs-4"></i><br/>
+    <small>Pendapatan</small>
+  </a>
+
+  @elseif(auth()->user()->role === 'developer')
+
+  <a href="{{ route('rental.index') }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-building fs-4"></i><br/>
+    <small>Rental</small>
+  </a>
+
+  <a href="{{ route('user.index') }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-people fs-4"></i><br/>
+    <small>User</small>
+  </a>
+  <a href="{{ route('wallet.withdraw') }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-cash-stack fs-4"></i><br/>
+    <small>Penarikan</small>
+</a>
+
+
+  <a href="{{ route('riwayat.index') }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-clock-history fs-4"></i><br/>
+    <small>Riwayat</small>
+  </a>
+
+  @endif
 </div>
+@endif
+@if(!auth()->check())
+<div class="bottom-nav d-flex flex-column align-items-center bg-white shadow-sm py-2 fixed-bottom text-muted small text-center">
+  <div>&copy; {{ date('Y') }} RentalPS</div>
+  <div>
+    <a href="mailto:contact@rentalps.com" class="text-decoration-none text-muted mx-1">Contact Us</a> |
+    <a href="tel:+6281234567890" class="text-decoration-none text-muted mx-1">+62 812-3456-7890</a>
+  </div>
+  <div>
+    <a href="https://facebook.com/rentalps" class="text-decoration-none text-muted mx-1" target="_blank"><i class="bi bi-facebook"></i></a>
+    <a href="https://twitter.com/rentalps" class="text-decoration-none text-muted mx-1" target="_blank"><i class="bi bi-twitter"></i></a>
+    <a href="https://instagram.com/rentalps" class="text-decoration-none text-muted mx-1" target="_blank"><i class="bi bi-instagram"></i></a>
+  </div>
+</div>
+@endif
+
+
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
 
 
 <!-- Flatpickr JS -->

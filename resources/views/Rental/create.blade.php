@@ -17,6 +17,10 @@
                 <label for="nik" class="form-label">NIK</label>
                 <input type="text" class="form-control" id="nik" name="nik" required>
             </div>
+            <div class="mb-3">
+                <label for="no_hp" class="form-label">Nomor HP</label>
+                <input type="number" class="form-control" id="no_hp" name="no_hp" required>
+            </div>
 
             <!-- Deskripsi -->
             <div class="mb-3">
@@ -91,6 +95,29 @@
                 </div>
             </div>
 
+            <hr>
+<h5 class="mt-4">Data Wallet</h5>
+<div id="wallet-container">
+    <div class="wallet-entry row g-2 mb-3">
+        <div class="col-12">
+            <input type="text" name="provider[]" class="form-control" placeholder="Nama Provider (misal: Gopay)" required>
+        </div>
+        <div class="col-12">
+            <input type="text" name="kode_provider[]" class="form-control" placeholder="Kode Provider (misal: GOPAY123)" required>
+        </div>
+        <div class="col-12 text-end">
+            <button type="button" class="btn btn-outline-danger btn-sm remove-wallet">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<div class="d-grid mb-3">
+    <button type="button" class="btn btn-outline-primary" id="add-wallet">
+        <i class="bi bi-plus-circle"></i> Tambah Wallet
+    </button>
+</div>
+
+<br><br>
             <button type="submit" class="btn btn-primary">Simpan</button>
         </form>
     </div>
@@ -221,6 +248,28 @@
         }
     });
 });
+
+// Tambah baris wallet baru
+$('#add-wallet').click(function() {
+    const walletEntry = `
+        <div class="wallet-entry row g-2 mb-3">
+            <div class="col-12">
+                <input type="text" name="provider[]" class="form-control" placeholder="Nama Provider" required>
+            </div>
+            <div class="col-12">
+                <input type="text" name="kode_provider[]" class="form-control" placeholder="Kode Provider" required>
+            </div>
+            <div class="col-12 text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm remove-wallet">Hapus</button>
+            </div>
+        </div>`;
+    $('#wallet-container').append(walletEntry);
+});
+
+$(document).on('click', '.remove-wallet', function() {
+    $(this).closest('.wallet-entry').remove();
+});
+
 
     </script>
 @endsection

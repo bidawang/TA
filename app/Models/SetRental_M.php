@@ -16,6 +16,8 @@ class SetRental_M extends Model
         'tv_id',
         'ps_id',
         'name',
+        'foto',
+        'status',
         'harga_per_jam',
     ];
 

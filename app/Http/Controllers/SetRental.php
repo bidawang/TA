@@ -7,6 +7,7 @@ use App\Models\SetRental_M;
 use App\Models\TV_M;
 use App\Models\PS_M;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SetRental extends Controller
 {
@@ -60,18 +61,38 @@ class SetRental extends Controller
     }
 
     public function store(Request $request)
-    {
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'tv_id' => 'required',
+        'ps_id' => 'required',
+        'harga_per_jam' => 'required|numeric|min:0',
+        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        SetRental_M::create([
-            'name' => $request->name,
-            'tv_id' => $request->tv_id,
-            'ps_id' => $request->ps_id,
-            'harga_per_jam' => $request->harga_per_jam,
-            'rental_id' => $request->rental_id,
-        ]);
-
-        return redirect()->route('setrental.index', ['rental_id' => $request->rental_id]);
+    $fotoPath = null;
+    if ($request->hasFile('foto')) {
+        $fotoPath = $request->file('foto')->store('setrental_foto', 'public');
     }
+
+    try {
+        SetRental_M::create([
+            'name' => $validated['name'],
+            'tv_id' => $validated['tv_id'],
+            'ps_id' => $validated['ps_id'],
+            'harga_per_jam' => $validated['harga_per_jam'],
+            'rental_id' => session('id_rental'),
+            'foto' => $fotoPath,
+        ]);
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => 'Gagal menyimpan data: ' . $e->getMessage()])->withInput();
+    }
+
+    return redirect()->route('setrental.index', ['rental_id' => session('id_rental')])
+                     ->with('success', 'Data berhasil disimpan!');
+}
+
+    
 
     public function show($id)
     {
@@ -89,21 +110,29 @@ class SetRental extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required',
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
             'tv_id' => 'required|exists:tv_m,id',
             'ps_id' => 'required|exists:ps_m,id',
+            'harga_per_jam' => 'required|numeric|min:0',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
+    
         $setRental = SetRental_M::findOrFail($id);
-        $setRental->update([
-            'name' => $request->name,
-            'tv_id' => $request->tv_id,
-            'ps_id' => $request->ps_id,
-        ]);
-
+    
+        // Hapus foto lama jika upload baru
+        if ($request->hasFile('foto')) {
+            if ($setRental->foto && Storage::disk('public')->exists($setRental->foto)) {
+                Storage::disk('public')->delete($setRental->foto);
+            }
+            $validated['foto'] = $request->file('foto')->store('setrental_foto', 'public');
+        }
+    
+        $setRental->update($validated);
+    
         return redirect()->route('setrental.index', ['rental_id' => $setRental->rental_id]);
     }
+    
 
     public function destroy($id)
     {
