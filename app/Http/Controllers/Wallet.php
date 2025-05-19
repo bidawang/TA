@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Wallet_M;
 use App\Models\UserWallet_M;
 use App\Models\WalletLogs_M;
+use App\Models\Penolakan_M;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +13,7 @@ class Wallet extends Controller
 {
     public function index()
 {
-    $wallet = WalletLogs_M::where('type', 'out')->get();
+    $wallet = WalletLogs_M::where('type', 'out', 'penolakan')->get();
 
     return view('wallet.index', compact('wallet'));
 }
@@ -133,6 +134,7 @@ class Wallet extends Controller
             'id_rental'     => session('id_rental'),
             'type'        => 'out',
             'status'        => 'pending',
+
         ]);
 
         // Kurangi saldo wallet (optional, bisa sesuai logic aplikasi)
@@ -142,18 +144,39 @@ class Wallet extends Controller
         return redirect()->route('user.profile', $user->google_id)
             ->with('success', 'Pengajuan penarikan saldo berhasil dikirim.');
     }
+
+
     public function updateStatus(Request $request, $id)
 {
-    $request->validate([
-        'status' => 'required|in:pending,disetujui,ditolak',
-    ]);
-
     $walletLog = WalletLogs_M::findOrFail($id);
     $walletLog->status = $request->status;
     $walletLog->save();
 
+    if ($request->status === 'ditolak') {
+        // Insert/update ke tabel penolakan
+        Penolakan_M::updateOrCreate(
+            ['id_wallet_logs' => $id],
+            ['keterangan' => $request->alasan]
+        );
+
+        // Kembalikan amount ke balance user
+        // Asumsi: $walletLog punya relasi ke user, misal $walletLog->user_id
+        // Jika tidak ada, sesuaikan relasi nya
+        $userWallet = UserWallet_M::where('id_rental', $walletLog->id_rental)->first();
+
+        if ($userWallet) {
+            $userWallet->balance += $walletLog->amount;
+            $userWallet->save();
+        }
+    } else {
+        // Kalau status bukan ditolak, hapus record penolakan yang terkait (optional)
+        Penolakan_M::where('id_wallet_logs', $id)->delete();
+    }
+
     return redirect()->back()->with('success', 'Status berhasil diperbarui.');
 }
+
+
 
         }
         

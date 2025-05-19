@@ -14,22 +14,23 @@ class Rental extends Controller
     public function dashboard(Request $request)
 {
     $query = Rental_M::with(['alamat', 'ratings'])
-    ->where('status', 'aktif');
+        ->where('status', 'aktif');
 
     if (!empty($request->search)) {
-    $query->where('nama', 'like', '%' . $request->search . '%');
-}
+        $query->where('nama', 'like', '%' . $request->search . '%');
+    }
 
-
-    $rentals = $query->get();
+    // Tambahkan withAvg agar ratings_avg_rating tersedia
+    $rentals = $query->withAvg('ratings', 'rating')->get();
 
     $topRentals = Rental_M::withAvg('ratings', 'rating')
         ->orderByDesc('ratings_avg_rating')
         ->take(5)
         ->get();
-// dd($request);
+
     return view('welcome', compact('rentals', 'topRentals'));
 }
+
 
 
 public function index()

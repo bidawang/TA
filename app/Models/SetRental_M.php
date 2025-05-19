@@ -37,7 +37,8 @@ class SetRental_M extends Model
         return $this->belongsTo(Rental_M::class); // Setiap rental detail dimiliki oleh satu rental
     }
     public function transaksi()
-    {
-        return $this->belongsTo(Transaksi_M::class); // Setiap rental detail dimiliki oleh satu rental
-    }
+{
+    return $this->hasOne(Transaksi_M::class, 'id_set_rental', 'id');
+}
+
 }

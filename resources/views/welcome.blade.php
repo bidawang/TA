@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="container py-4">
+<div class="container py-2">
 
     <h5 class="mb-3 text-center fw-bold">Top Rental PS</h5>
 
@@ -45,31 +45,37 @@
 
     <h5 class="mb-3 text-center fw-bold">Semua Rental PS</h5>
 
-    @forelse ($rentals as $rental)
-        <div class="card mb-3 shadow-sm rounded-3" style="overflow: hidden;">
-            <div class="row g-0 align-items-center">
-                <div class="col-5">
-                    <img src="{{ $rental->logo ? asset('storage/' . $rental->logo) : 'https://via.placeholder.com/400x250?text=' . urlencode($rental->nama) }}"
-                         alt="Logo {{ $rental->nama }}" class="img-fluid rounded-start" style="height: 140px; object-fit: cover; width: 100%;">
-                </div>
-                <div class="col-7 p-3">
-                    <h6 class="fw-bold mb-1 text-truncate" title="{{ $rental->nama }}">{{ $rental->nama }}</h6>
-                    <p class="text-muted small mb-1 text-truncate" title="{{ $rental->alamat->alamat_lengkap }}">{{ $rental->alamat->alamat_lengkap }}</p>
-                    <p class="mb-2">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <i class="bi bi-star{{ $i <= round($rental->ratings_avg_rating) ? '-fill text-warning' : '' }}"></i>
-                        @endfor
-                        <small>({{ number_format($rental->ratings_avg_rating ?? 0, 1) }})</small>
-                    </p>
-                    <a href="{{ route('rental.show', $rental->id) }}" class="btn btn-sm btn-primary w-100">
-                        <i class="bi bi-eye"></i> Lihat Detail
-                    </a>
-                </div>
+@forelse ($rentals as $rental)
+    <div class="card mb-3 shadow-sm rounded-3" style="overflow: hidden;">
+        <div class="row g-0 align-items-center">
+            <div class="col-5">
+                <img src="{{ $rental->logo ? asset('storage/' . $rental->logo) : 'https://via.placeholder.com/400x250?text=' . urlencode($rental->nama) }}"
+                     alt="Logo {{ $rental->nama }}" class="img-fluid rounded-start" style="height: 140px; object-fit: cover; width: 100%;">
+            </div>
+            <div class="col-7 p-3">
+                <h6 class="fw-bold mb-1 text-truncate" title="{{ $rental->nama }}">{{ $rental->nama }}</h6>
+                <p class="text-muted small mb-1 text-truncate" title="{{ $rental->alamat->alamat_lengkap }}">
+                    {{ $rental->alamat->alamat_lengkap }}
+                </p>
+                <p class="mb-2">
+                    @php
+                        $rating = round($rental->ratings_avg_rating ?? 0);
+                    @endphp
+                    @for ($i = 1; $i <= 5; $i++)
+                        <i class="bi bi-star{{ $i <= $rating ? '-fill text-warning' : '' }}"></i>
+                    @endfor
+                    <small>({{ number_format($rental->ratings_avg_rating ?? 0, 1) }})</small>
+                </p>
+                <a href="{{ route('rental.show', $rental->id) }}" class="btn btn-sm btn-primary w-100">
+                    <i class="bi bi-eye"></i> Lihat Detail
+                </a>
             </div>
         </div>
-    @empty
-        <p class="text-center text-muted mt-5">Belum ada rental tersedia.</p>
-    @endforelse
+    </div>
+@empty
+    <p class="text-center text-muted mt-5">Belum ada rental tersedia.</p>
+@endforelse
+
 
 </div>
 

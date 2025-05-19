@@ -21,4 +21,7 @@ class WalletLogs_M extends Model
     public function rental(){
         return $this->hasOne(Rental_M::class, 'id', 'id_rental');
     }
+    public function penolakan(){
+        return $this->hasOne(Penolakan_M::class, 'id_wallet_logs');
+    }
 }

@@ -144,6 +144,11 @@
     <small>Pendapatan</small>
   </a>
 
+  <a href="{{ route('wallet.index') }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-cash-stack fs-4"></i><br/>
+    <small>Riwayat</small>
+</a>
+
   @elseif(auth()->user()->role === 'developer')
 
   <a href="{{ route('rental.index') }}" class="text-center text-decoration-none text-secondary">
@@ -155,7 +160,7 @@
     <i class="bi bi-people fs-4"></i><br/>
     <small>User</small>
   </a>
-  <a href="{{ route('wallet.withdraw') }}" class="text-center text-decoration-none text-secondary">
+  <a href="{{ route('wallet.index') }}" class="text-center text-decoration-none text-secondary">
     <i class="bi bi-cash-stack fs-4"></i><br/>
     <small>Penarikan</small>
 </a>
@@ -169,7 +174,7 @@
   @endif
 </div>
 @endif
-@if(!auth()->check())
+@if(!auth()->check() || auth()->user()->role == 'user')
 <div class="bottom-nav d-flex flex-column align-items-center bg-white shadow-sm py-2 fixed-bottom text-muted small text-center">
   <div>&copy; {{ date('Y') }} RentalPS</div>
   <div>

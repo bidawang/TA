@@ -30,7 +30,7 @@ class SetRental extends Controller
 {
     $rental_id = $request->query('rental_id');
 
-    $query = SetRental_M::with(['tv', 'ps', 'rental']);
+    $query = SetRental_M::with(['tv', 'ps', 'rental', 'transaksi']);
 
     if ($rental_id) {
         $query->where('rental_id', $rental_id);
