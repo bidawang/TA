@@ -1,4 +1,4 @@
-<div class="col-12 mb-3">
+<div class="col-12 mb-1">
   <div class="card border-0 shadow-sm rounded-3">
     <div class="card-body d-flex align-items-start gap-3 p-2">
       <!-- Gambar -->
@@ -14,9 +14,11 @@
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <div class="fw-semibold text-primary small mb-1">{{ $setRental->name }}</div>
+            
             <div class="text-muted small mb-1">
-  <div><strong>TV:</strong> {{ $setRental->tv->merek ?? '-' }}</div>
-  <div><strong>PS:</strong> {{ $setRental->ps->model_ps ?? '-' }}</div>
+  <div>{{ $setRental->ps->model_ps ?? '-' }}</div>
+              <div class="text-dark fw-semibold">Rp {{ number_format($setRental->harga_per_jam, 0, ',', '.') }}/jam</div>
+
  @php
     use Carbon\Carbon;
 
@@ -39,35 +41,40 @@
     }
 @endphp
 
-@if($setRental->status == 'dipakai' && isset($formattedTime))
-    <div class="text-danger">
-        <strong>Dipakai sampai:</strong> {{ $formattedTime }} <span class="text-lowercase">({{ $label }})</span>
-    </div>
-@elseif($setRental->status == 'dipakai')
-    <div class="text-danger"><strong>Dipakai:</strong> Jam tidak tersedia</div>
-@endif
+
 
 </div>
 
-            <div class="text-dark small fw-semibold">Rp {{ number_format($setRental->harga_per_jam, 0, ',', '.') }}/jam</div>
           </div>
-          <!-- Tombol Info -->
+          <!-- Tombol Info -->@if(auth()->check() && (auth()->user()->role === 'developer' || auth()->user()->role === 'admin'))
+
           <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detailModal{{ $setRental->id }}" title="Lihat detail">
             <i class="bi bi-info-circle"></i>
           </button>
+          @endif
         </div>
       </div>
 
       <!-- Aksi -->
       <div class="d-flex flex-column gap-1 text-end">
+        @if(auth()->check() && (auth()->user()->role === 'developer' || auth()->user()->role === 'admin'))
+
         <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pakaiModal{{ $setRental->id }}" title="Pakai">
           🚀 Pakai
         </button>
+        @endif
         <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bookingModal{{ $setRental->id }}" title="Booking">
           🛒 Booking
         </button>
       </div>
     </div>
+    @if($setRental->status == 'dipakai' && isset($formattedTime))
+    <div class="text-danger p-2 small text-end">
+        <strong>Selesai jam</strong>{{ $formattedTime }} <span class="text-lowercase">({{ $label }})</span>
+    </div>
+@elseif($setRental->status == 'dipakai')
+    <div class="text-danger"><strong>Dipakai:</strong>Jam tidak tersedia</div>
+@endif
   </div>
 
   <!-- Modal Pakai & Booking -->

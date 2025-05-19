@@ -124,7 +124,7 @@
 </div>
 
 <!-- Bottom Navigation -->
-@if(auth()->check() && (auth()->user()->role === 'developer' || auth()->user()->role === 'admin'))
+@if(auth()->check() && (auth()->user()->role === 'developer' || auth()->user()->role === 'admin' || auth()->user()->role === 'user'))
 
 <div class="bottom-nav d-flex justify-content-around bg-white shadow-sm py-2 fixed-bottom">
   @if(auth()->user()->role === 'admin')
@@ -170,11 +170,20 @@
     <i class="bi bi-clock-history fs-4"></i><br/>
     <small>Riwayat</small>
   </a>
+    @elseif(auth()->user()->role === 'user')
 
+<a href="{{ route('dashboard') }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-building fs-4"></i><br/>
+    <small>Home</small>
+  </a>
+<a href="{{ route('transaksi.index') }}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-building fs-4"></i><br/>
+    <small>Riwayat</small>
+  </a>
   @endif
 </div>
 @endif
-@if(!auth()->check() || auth()->user()->role == 'user')
+@if(!auth()->check())
 <div class="bottom-nav d-flex flex-column align-items-center bg-white shadow-sm py-2 fixed-bottom text-muted small text-center">
   <div>&copy; {{ date('Y') }} RentalPS</div>
   <div>

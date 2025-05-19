@@ -20,7 +20,8 @@ class Transaksi_M extends Model
         'jumlah_jam',
         'total',
         'jenis',
-        'keterangan'
+        'keterangan',
+        'google_id',
     ];
 
     public function pembayaran()

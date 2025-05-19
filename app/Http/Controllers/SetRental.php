@@ -112,8 +112,6 @@ class SetRental extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'tv_id' => 'required|exists:tv_m,id',
-            'ps_id' => 'required|exists:ps_m,id',
             'harga_per_jam' => 'required|numeric|min:0',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);

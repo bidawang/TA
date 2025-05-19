@@ -12,10 +12,13 @@
   </ul>
 </div>
 @endif
+@if(auth()->check() && (auth()->user()->role === 'developer' || auth()->user()->role === 'admin'))
+
 
 <a href="{{ route('setrental.create', ['rental_id' => $rental_id]) }}" class="btn btn-primary btn-sm mb-3">
   ➕ Tambah SetRental
 </a>
+@endif
 <ul class="nav nav-tabs mb-3" id="statusTabs" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link active" id="tidak-tab" data-bs-toggle="tab" data-bs-target="#tidak" type="button" role="tab">Tersedia</button>

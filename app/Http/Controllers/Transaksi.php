@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 
 class Transaksi extends Controller
 {
+    
     public function store(Request $request)
 {
     $jenis = $request->input('status');
@@ -74,6 +75,7 @@ class Transaksi extends Controller
         'total'         => $totalHarga,
         'jenis'         => $jenis,
         'keterangan'    => $request->input('keterangan'),
+        'google_id'     => Auth::user()->google_id
     ]);
 
     // ==== JIKA BUKAN, TIDAK USAH TRIPAY ====
