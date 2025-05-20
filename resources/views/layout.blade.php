@@ -12,6 +12,7 @@
   <!-- Select2 -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <!-- Flatpickr CSS -->
@@ -139,15 +140,29 @@
     <small>Home</small>
   </a>
 
-  <a href="{{ route('pendapatan', ['id' => session('id_rental')]) }}" class="text-center text-decoration-none text-secondary">
-    <i class="bi bi-cash-stack fs-4"></i><br/>
-    <small>Pendapatan</small>
+  <div class="dropup text-center">
+  <a class="text-decoration-none text-secondary dropdown-toggle d-flex flex-column align-items-center"
+     href="#" role="button" id="dropupMenuLink" data-bs-toggle="dropdown" aria-expanded="false" style="gap: 0.15rem;">
+    <i class="bi bi-cash-stack fs-4"></i>
+    <small class="fw-semibold">Keuangan</small>
   </a>
-
-  <a href="{{ route('wallet.index') }}" class="text-center text-decoration-none text-secondary">
-    <i class="bi bi-cash-stack fs-4"></i><br/>
+  <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 py-2" aria-labelledby="dropupMenuLink" style="min-width: 140px;">
+    <li>
+      <a class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 fw-medium text-dark" href="{{ route('pendapatan', ['id' => session('id_rental')]) }}">
+        <i class="bi bi-graph-up fs-5 text-success"></i> Pendapatan
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 fw-medium text-dark" href="{{ route('wallet.index') }}">
+        <i class="bi bi-clock-history fs-5 text-primary"></i> Riwayat
+      </a>
+    </li>
+  </ul>
+</div>
+<a href="{{ route('transaksi.index')}}" class="text-center text-decoration-none text-secondary">
+    <i class="bi bi-house-door fs-4"></i><br/>
     <small>Riwayat</small>
-</a>
+  </a>
 
   @elseif(auth()->user()->role === 'developer')
 

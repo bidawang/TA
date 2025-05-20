@@ -7,6 +7,7 @@ use App\Models\Transaksi_M;
 use App\Models\SetRental_M;
 use App\Models\Rental_M;
 use App\Models\Tripay_M;
+use App\Models\User;
 use App\Models\UserWallet_M;
 use App\Models\WalletLogs_M;
 
@@ -17,6 +18,49 @@ use Illuminate\Support\Str;
 
 class Transaksi extends Controller
 {
+    public function index()
+{
+    $authUser = Auth::user();
+    $googleId = $authUser->google_id;
+    $role = $authUser->role;
+
+    // Default pagination limit
+    $perPage = 3;
+
+    // Data transaksi & user (profil)
+    $trans = null;
+    $user = null;
+
+    if ($role === 'user') {
+        $user = User::where('google_id', $googleId)->first();
+        $trans = Transaksi_M::where('google_id', $googleId)
+                    ->with('rental','user','setRental')
+                    ->latest()
+                    ->paginate($perPage);
+    }
+
+    elseif ($role === 'admin' || $role === 'developer') {
+        $user = Rental_M::where('google_id', $googleId)->first();
+
+        // Jika rental tidak ditemukan, kembalikan error
+        if (!$user) {
+            abort(404, 'Rental tidak ditemukan untuk admin/developer ini.');
+        }
+
+        $trans = Transaksi_M::where('id_rental', $user->id)
+                    ->with('rental')
+                    ->latest()
+                    ->paginate($perPage);
+    }
+
+    else {
+        abort(403, 'Role tidak dikenali.');
+    }
+
+    return view('Transaksi.index', compact('trans', 'user'));
+}
+
+
     
     public function store(Request $request)
 {

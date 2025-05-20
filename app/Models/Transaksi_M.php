@@ -31,5 +31,13 @@ class Transaksi_M extends Model
 public function setRental(){
     return $this->hasOne(SetRental_M::class, 'id', 'id_set_rental');
 }
+public function rental(){
+    return $this->hasOne(Rental_M::class, 'id', 'id_rental');
+}
+public function user(){
+    return $this->hasOne(User::class, 'google_id','google_id');
+}
+
+
 
 }

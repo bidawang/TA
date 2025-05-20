@@ -24,7 +24,7 @@
     <div class="mb-4 text-center">
         <a href="{{ route('user.edit', $user->google_id) }}" class="btn btn-warning px-4">Edit Profil</a>
     </div>
-
+@if(Auth::user()->role=="admin")
     {{-- List Metode Pembayaran --}}
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -71,5 +71,6 @@
             @endif
         </div>
     </div>
+    @endif
 </div>
 @endsection

@@ -24,10 +24,6 @@
         <div class="flex-grow-1 d-flex flex-column justify-content-between">
             <div>
                 <h5 class="card-title mb-3 fw-bold" style="font-size: 1.25rem;">{{ $rental->nama }}</h5>
-
-                @if(auth()->check() && in_array(auth()->user()->role, ['developer', 'admin']))
-                    <p class="mb-1"><strong>NIK:</strong> {{ $rental->nik }}</p>
-                @endif
             </div>
 
             @if(auth()->check() && in_array(auth()->user()->role, ['developer', 'admin']))

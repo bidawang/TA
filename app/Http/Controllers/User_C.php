@@ -9,10 +9,11 @@ class User_C extends Controller
 {
     // Tampilkan daftar user
     public function index()
-    {
-        $users = User::all();
-        return view('user.index', compact('users'));
-    }
+{
+    $users = User::where('role', '!=', 'developer')->get();
+    return view('user.index', compact('users'));
+}
+
 
     // Tampilkan detail user
     public function edit($google_id)
