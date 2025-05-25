@@ -22,6 +22,7 @@ class Transaksi_M extends Model
         'jenis',
         'keterangan',
         'google_id',
+        'payment_method',
     ];
 
     public function pembayaran()
@@ -37,6 +38,12 @@ public function rental(){
 public function user(){
     return $this->hasOne(User::class, 'google_id','google_id');
 }
+
+public function metodePembayaran()
+{
+    return $this->hasOne(MetodePembayaran_M::class, 'id_transaksi');
+}
+
 
 
 

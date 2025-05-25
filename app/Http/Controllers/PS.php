@@ -7,13 +7,18 @@ use App\Models\Platform_M;
 use App\Models\GamePS_M;
 use App\Models\Game_M;
 use App\Models\Storage_M;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class PS extends Controller
 {
     public function index()
     {
-        $psList = PS_M::all();
+        $idRental = session('id_rental');
+    $googleId = Auth::user()->google_id;
+        $psList = PS_M::where('id_rental', $idRental)
+                 ->where('google_id', $googleId)
+                 ->get();
         return view('ps.index', compact('psList'));
     }
 
@@ -27,7 +32,6 @@ class PS extends Controller
         $request->validate([
             'model_ps' => 'required',
             'storage' => 'required',
-            'tipe' => 'required',
             'seri' => 'required',
             'foto' => 'nullable|image|max:2048',
         ]);
@@ -41,9 +45,10 @@ class PS extends Controller
         PS_M::create([
             'model_ps' => $request->model_ps,
             'storage' => $request->storage,
-            'tipe' => $request->tipe,
             'seri' => $request->seri,
             'foto' => $fotoPath,
+            'id_rental' => session('id_rental'),
+            'google_id' => Auth::user()->google_id,
         ]);
 
         return redirect()->route('ps.index')->with('success', 'Data PS berhasil ditambahkan.');
@@ -79,10 +84,6 @@ class PS extends Controller
     return view('ps.show', compact('ps', 'games', 'ownedGames'));
 }
 
-
-
-
-
     public function edit($id)
     {
         $ps = PS_M::findOrFail($id);
@@ -94,7 +95,6 @@ class PS extends Controller
         $request->validate([
             'model_ps' => 'required',
             'storage' => 'required',
-            'tipe' => 'required',
             'seri' => 'required',
             'foto' => 'nullable|image|max:2048',
         ]);
@@ -110,7 +110,6 @@ class PS extends Controller
         $ps->update([
             'model_ps' => $request->model_ps,
             'storage' => $request->storage,
-            'tipe' => $request->tipe,
             'seri' => $request->seri,
             'foto' => $ps->foto,
         ]);

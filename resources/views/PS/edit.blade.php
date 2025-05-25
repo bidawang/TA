@@ -15,10 +15,6 @@
       <input type="text" name="storage" class="form-control" value="{{ old('storage', $ps->storage) }}" required>
     </div>
     <div class="mb-3">
-      <label>Tipe</label>
-      <input type="text" name="tipe" class="form-control" value="{{ old('tipe', $ps->tipe) }}" required>
-    </div>
-    <div class="mb-3">
       <label>Seri</label>
       <input type="text" name="seri" class="form-control" value="{{ old('seri', $ps->seri) }}" required>
     </div>

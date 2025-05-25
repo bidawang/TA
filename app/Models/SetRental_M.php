@@ -38,7 +38,8 @@ class SetRental_M extends Model
     }
     public function transaksi()
 {
-    return $this->hasOne(Transaksi_M::class, 'id_set_rental', 'id');
+    return $this->hasMany(Transaksi_M::class, 'id_set_rental', 'id')->latest();
 }
+
 
 }

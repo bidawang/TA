@@ -32,7 +32,7 @@ class View extends Controller
             $rental = Rental_M::where('google_id', $user->google_id)->first();
 
             $transaksi = Transaksi_M::with('pembayaran','setRental')
-                ->where('id_rental', $rental->id_rental)
+                ->where('id_rental', $rental->id)
                 ->latest()
                 ->get();
         } else {
@@ -40,23 +40,21 @@ class View extends Controller
         }
 
         $transaksiTripay = [];
-
         foreach ($transaksi as $tx) {
             if (!empty($tx->pembayaran?->reference)) {
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $this->tripayApiKey,
                     'Accept' => 'application/json'
-                ])->get($this->tripayApiUrl . '/transaction/detail', [
-                    'reference' => $tx->pembayaran->reference
-                ]);
-
-                if ($response->successful() && isset($response['data'])) {
-                    $transaksiTripay[$tx->id_transaksi] = $response['data'];
+                    ])->get($this->tripayApiUrl . '/transaction/detail', [
+                        'reference' => $tx->pembayaran->reference
+                    ]);
+                    
+                    if ($response->successful() && isset($response['data'])) {
+                        $transaksiTripay[$tx->id_transaksi] = $response['data'];
+                    }
                 }
             }
-        }
-
-        return view('riwayat.index', compact('transaksi', 'transaksiTripay'));
+        return view('Riwayat.index', compact('transaksi', 'transaksiTripay'));
     }
 
     public function show($id)

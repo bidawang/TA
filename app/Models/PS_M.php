@@ -14,9 +14,9 @@ class PS_M extends Model
     protected $fillable = [
         'model_ps',
         'storage',
-        'tipe',
         'seri',
-        'foto',
+        'id_rental',
+        'google_id',
     ];
 
     public function setrental()

@@ -19,6 +19,7 @@ class Rental_M extends Model
         'google_id',
         'deskripsi',
         'status',
+        'status_rental',
     ];
 
     // relasi ke tabel alamat (misalnya)

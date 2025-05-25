@@ -3,6 +3,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pembayaran_M;
+use App\Models\Tripay_M;
+use App\Models\Transaksi_M;
 use Carbon\Carbon;
 
 class Tripay extends Controller
@@ -12,6 +14,7 @@ class Tripay extends Controller
     try {
         $signatureKey = env('TRIPAY_PRIVATE_KEY');
         $callbackSignature = $request->header('X-Callback-Signature');
+
         if (!$callbackSignature) {
             return response()->json(['success' => false, 'message' => 'Signature header missing'], 400);
         }
@@ -31,25 +34,15 @@ class Tripay extends Controller
             return response()->json(['success' => false, 'message' => 'Data reference/status missing'], 400);
         }
 
-        $pembayaran = Pembayaran_M::where('reference', $reference)->first();
-        if (!$pembayaran) {
-            return response()->json(['success' => false, 'message' => 'Pembayaran tidak ditemukan'], 404);
+        $tripay = Tripay_M::where('reference', $reference)->first();
+        if (!$tripay) {
+            return response()->json(['success' => false, 'message' => 'Data Tripay tidak ditemukan'], 404);
         }
 
-        $paidAt = null;
-        if ($status === 'PAID' && !empty($data['paid_at'])) {
-            try {
-                // paid_at dalam format timestamp UNIX
-                $paidAt = Carbon::createFromTimestamp($data['paid_at']);
-            } catch (\Exception $e) {
-                $paidAt = null;
-            }
+        if ($status === 'PAID') {
+            Transaksi_M::where('id_transaksi', $tripay->transaksi_id)
+                ->update(['status' => 'selesai']);
         }
-
-        $pembayaran->update([
-            'status' => $status,
-            'paid_at' => $paidAt,
-        ]);
 
         return response()->json(['success' => true]);
     } catch (\Exception $e) {
@@ -57,5 +50,6 @@ class Tripay extends Controller
         return response()->json(['success' => false, 'message' => 'Internal server error'], 500);
     }
 }
+
 
 }

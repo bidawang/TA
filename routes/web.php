@@ -6,6 +6,7 @@ use App\Http\Controllers\SetRental;
 use App\Http\Controllers\Fasilitas;
 use App\Http\Controllers\Galeri;
 use App\Http\Controllers\PS;
+use App\Http\Controllers\TV;
 use App\Http\Controllers\GamePS;
 use App\Http\Controllers\Google;
 use App\Http\Controllers\Rating;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Transaksi;
 use App\Http\Controllers\Tripay;
 use App\Http\Controllers\View;
 use App\Http\Controllers\Wallet;
+use App\Http\Controllers\Ajax;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -29,9 +31,12 @@ Route::get('/', [Rental::class, 'dashboard'])->name('dashboard');
 
 Route::resource('rental', Rental::class);
 Route::resource('setrental', SetRental::class);
+Route::put('/setrental/selesai/{id}', [SetRental::class, 'selesai'])->name('setrental.selesai');
+
 Route::resource('fasilitas', Fasilitas::class);
 Route::resource('galeri', Galeri::class);
 Route::resource('ps', PS::class);
+Route::resource('tv', TV::class);
 Route::post('/gameps/bulk-delete', [GamePS::class, 'bulkDelete'])->name('gameps.bulkDelete');
 
 Route::resource('gameps', GamePS::class);
@@ -57,5 +62,10 @@ Route::post('wallet/withdraw', [Wallet::class, 'tariktunai'])
 Route::get('/pendapatan/{id}', [View::class, 'pendapatan'])->name('pendapatan');
 
 Route::get('pendapatan/custom', [View::class, 'pendapatanCustom'])->name('pendapatan.Custom');
+Route::patch('/transaksi/{id}/update-status', [Transaksi::class, 'updateStatus'])->name('transaksi.updateStatus');
+Route::post('/transaksi/{id}/bayar', [Transaksi::class, 'bayar'])->name('transaksi.bayar');
 
+Route::put('/setrental/{id}/maintenance', [SetRental::class, 'toMaintenance'])->name('setrental.maintenance');
+Route::put('/setrental/{id}/aktifkan', [SetRental::class, 'toAktif'])->name('setrental.aktifkan');
+Route::get('/notifikasi/transaksi', [Ajax::class, 'getTransaksi'])->name('notifikasi.transaksi')->middleware('auth');
 

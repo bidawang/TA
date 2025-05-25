@@ -1,5 +1,5 @@
 {{-- Mobile --}}
-<div class="d-md-none" id="mobileView">
+<div id="mobileView">
     @forelse ($transaksi as $tx)
         @php
             $tripay = $transaksiTripay[$tx->id_transaksi] ?? null;

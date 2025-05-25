@@ -44,8 +44,11 @@
       <select id="tv_id" name="tv_id" class="form-select select2" required>
         <option value="" disabled selected>Pilih TV</option>
         @foreach ($tvs as $tv)
+            @if ($tv->id_rental == session('id_rental') && $tv->google_id == Auth::user()->google_id)
           <option value="{{ $tv->id }}">{{ $tv->merek }}</option>
-        @endforeach
+          @endif
+          @endforeach
+
       </select>
       <div class="invalid-feedback">Silakan pilih TV.</div>
     </div>
@@ -55,7 +58,10 @@
       <select id="ps_id" name="ps_id" class="form-select select2" required>
         <option value="" disabled selected>Pilih PS</option>
         @foreach ($ps as $psItem)
+                    @if ($psItem->id_rental == session('id_rental') && $psItem->google_id == Auth::user()->google_id)
+
           <option value="{{ $psItem->id }}">{{ $psItem->model_ps }}</option>
+          @endif
         @endforeach
       </select>
       <div class="invalid-feedback">Silakan pilih PS.</div>

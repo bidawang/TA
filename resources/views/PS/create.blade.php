@@ -6,24 +6,24 @@
   <form action="{{ route('ps.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
     <div class="mb-3">
-      <label>Model PS</label>
-      <input type="text" name="model_ps" class="form-control" required>
-    </div>
+    <label for="model_ps" class="form-label">Model PS</label>
+    <select name="model_ps" id="model_ps" class="form-control" required>
+        <option value="" disabled selected>Pilih Model PS</option>
+        <option value="PlayStation">PlayStation 1</option>
+        <option value="PlayStation 2">PlayStation 2</option>
+        <option value="PlayStation 3">PlayStation 3</option>
+        <option value="PlayStation 4">PlayStation 4</option>
+        <option value="PlayStation 5">PlayStation 5</option>
+    </select>
+</div>
+
     <div class="mb-3">
-      <label>Storage</label>
-      <input type="text" name="storage" class="form-control" required>
-    </div>
-    <div class="mb-3">
-      <label>Tipe</label>
-      <input type="text" name="tipe" class="form-control" required>
+      <label>Storage (GB)</label>
+      <input type="number" name="storage" class="form-control" placeholder="Isi angka nya saja" required>
     </div>
     <div class="mb-3">
       <label>Seri</label>
       <input type="text" name="seri" class="form-control" required>
-    </div>
-    <div class="mb-3">
-      <label>Foto</label>
-      <input type="file" name="foto" class="form-control">
     </div>
     <button type="submit" class="btn btn-primary">Simpan</button>
   </form>

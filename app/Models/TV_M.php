@@ -14,9 +14,8 @@ class TV_M extends Model
     protected $fillable = [
         'merek',
         'ukuran',
-        'tipe',
-        'resolusi',
-        'foto',
+        'id_rental',
+        'google_id',
     ];
 
     public function setrental()

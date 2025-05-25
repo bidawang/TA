@@ -1,87 +1,131 @@
 <div class="col-12 mb-1">
   <div class="card border-0 shadow-sm rounded-3">
-    <div class="card-body d-flex align-items-start gap-3 p-2">
-      <!-- Gambar -->
+    <div class="card-body d-flex gap-3 p-2">
+      {{-- Thumbnail --}}
       <div class="rounded-2 overflow-hidden" style="width: 64px; height: 64px;">
         <img src="{{ $setRental->foto ? asset('storage/'.$setRental->foto) : asset('images/placeholder.png') }}"
              alt="{{ $setRental->name }}"
-             class="w-100 h-100"
-             style="object-fit: cover;">
+             class="w-100 h-100 object-fit-cover">
       </div>
 
-      <!-- Info Utama -->
+      {{-- Info utama --}}
       <div class="flex-grow-1">
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <div class="fw-semibold text-primary small mb-1">{{ $setRental->name }}</div>
-            
-            <div class="text-muted small mb-1">
-  <div>{{ $setRental->ps->model_ps ?? '-' }}</div>
+            <div class="text-muted small">
+              <div>{{ $setRental->ps->model_ps ?? '-' }}</div>
               <div class="text-dark fw-semibold">Rp {{ number_format($setRental->harga_per_jam, 0, ',', '.') }}/jam</div>
 
- @php
-    use Carbon\Carbon;
+              @php
+                use Carbon\Carbon;
+                $trans = $setRental->transaksi->first();
+                $formattedTime = null;
+                $label = null;
 
-    $jam = $setRental->transaksi->jam_selesai ?? null;
+                if ($trans && $trans->jam_selesai) {
+                  $waktu = Carbon::parse($trans->jam_selesai);
+                  $formattedTime = $waktu->format('H:i');
+                  $hour = (int) $waktu->format('H');
 
-    if ($jam) {
-        $waktu = Carbon::parse($jam);
-        $formattedTime = $waktu->format('H:i');
-        $hour = (int) $waktu->format('H');
-
-        if ($hour >= 5 && $hour < 12) {
-            $label = 'pagi';
-        } elseif ($hour >= 12 && $hour < 15) {
-            $label = 'siang';
-        } elseif ($hour >= 15 && $hour < 18) {
-            $label = 'sore';
-        } else {
-            $label = 'malam';
-        }
-    }
-@endphp
-
-
-
-</div>
-
+                  $label = match(true) {
+                    $hour >= 5 && $hour < 12 => 'pagi',
+                    $hour >= 12 && $hour < 15 => 'siang',
+                    $hour >= 15 && $hour < 18 => 'sore',
+                    default => 'malam'
+                  };
+                }
+              @endphp
+            </div>
           </div>
-          <!-- Tombol Info -->@if(auth()->check() && (auth()->user()->role === 'developer' || auth()->user()->role === 'admin'))
 
-          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detailModal{{ $setRental->id }}" title="Lihat detail">
-            <i class="bi bi-info-circle"></i>
-          </button>
+          {{-- Tombol info --}}
+          @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
+            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detailModal{{ $setRental->id }}" title="Lihat detail">
+              <i class="bi bi-info-circle"></i>
+            </button>
           @endif
         </div>
       </div>
 
-      <!-- Aksi -->
+      {{-- Aksi --}}
       <div class="d-flex flex-column gap-1 text-end">
-        @if(auth()->check() && (auth()->user()->role === 'developer' || auth()->user()->role === 'admin'))
-
-        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pakaiModal{{ $setRental->id }}" title="Pakai">
-          🚀 Pakai
-        </button>
+        @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
+          @if($setRental->status !== 'dipakai')
+            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pakaiModal{{ $setRental->id }}">🚀 Pakai</button>
+          @endif
         @endif
-        <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bookingModal{{ $setRental->id }}" title="Booking">
-          🛒 Booking
-        </button>
+        <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bookingModal{{ $setRental->id }}">🛒 Booking</button>
+        @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
+    <form action="{{ $setRental->status === 'maintenance' ? route('setrental.aktifkan', $setRental->id) : route('setrental.maintenance', $setRental->id) }}"
+          method="POST" class="form-switch mt-2 text-end">
+        @csrf
+        @method('PUT')
+        <input type="checkbox"
+               class="form-check-input"
+               onchange="this.form.submit()"
+               {{ $setRental->status === 'maintenance' ? '' : 'checked' }}
+               role="switch"
+               title="Status {{ $setRental->status === 'maintenance' ? 'Maintenance' : 'Aktif' }}">
+        <label class="form-check-label small ms-2">
+{{ $setRental->status === 'maintenance' ? 'Maintenance' : 'Aktif' }}
+        </label>
+    </form>
+@endif
+
       </div>
     </div>
-    @if($setRental->status == 'dipakai' && isset($formattedTime))
-    <div class="text-danger p-2 small text-end">
-        <strong>Selesai jam</strong>{{ $formattedTime }} <span class="text-lowercase">({{ $label }})</span>
-    </div>
-@elseif($setRental->status == 'dipakai')
-    <div class="text-danger"><strong>Dipakai:</strong>Jam tidak tersedia</div>
+
+    {{-- Status Dipakai --}}
+    @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
+    @if($setRental->status === 'dipakai')
+        <div class="text-danger p-2 small d-flex justify-content-between align-items-center">
+            <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#selesaiModal{{ $setRental->id }}">Selesai</button>
+            <div>
+                @if($formattedTime)
+                    <strong>Selesai jam</strong> {{ $formattedTime }} <span class="text-lowercase">({{ $label }})</span>
+                @else
+                    <strong>Dipakai:</strong> Jam tidak tersedia
+                @endif
+            </div>
+        </div>
+    @endif
+
+    {{-- Jadwal User --}}
+    @if($setRental->transaksi->where('google_id', $userGoogleId)->isNotEmpty())
+        <div class="accordion mt-2" id="transaksiAccordion{{ $setRental->id }}">
+            <div class="accordion-item border-0">
+                <h2 class="accordion-header" id="headingTrans{{ $setRental->id }}">
+                    <button class="accordion-button collapsed px-2 py-1 small" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseTrans{{ $setRental->id }}" aria-expanded="false"
+                            aria-controls="collapseTrans{{ $setRental->id }}">
+                        📄 Jadwal Anda
+                    </button>
+                </h2>
+                <div id="collapseTrans{{ $setRental->id }}" class="accordion-collapse collapse"
+                     data-bs-parent="#transaksiAccordion{{ $setRental->id }}">
+                    <div class="accordion-body p-2">
+                        @foreach($setRental->transaksi->where('google_id', $userGoogleId) as $trans)
+                            <div class="border rounded p-2 mb-2 bg-light shadow-sm">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="fw-semibold">🕒 {{ \Carbon\Carbon::parse($trans->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($trans->jam_selesai)->format('H:i') }}</span>
+                                    <span>{{ $trans->jumlah_jam }} jam</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endif
   </div>
 
-  <!-- Modal Pakai & Booking -->
+  {{-- Modal --}}
   @include('SetRental.pakai', ['setRental' => $setRental, 'rental_id' => $rental_id])
   @include('SetRental.booking', ['setRental' => $setRental, 'rental_id' => $rental_id, 'tripayChannels' => $tripayChannels])
 
-  <!-- Modal Detail -->
+  {{-- Detail Modal --}}
   <div class="modal fade" id="detailModal{{ $setRental->id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ $setRental->id }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content rounded-3">

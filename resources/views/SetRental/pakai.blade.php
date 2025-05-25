@@ -5,7 +5,7 @@
       <form method="POST" action="{{ route('transaksi.store') }}">
         @csrf
         <input type="hidden" name="id_set_rental" value="{{ $setRental->id }}">
-        <input type="hidden" name="id_rental" value="{{ $rental_id }}">
+        <input type="hidden" name="id_rental" value="{{ $setRental->rental_id }}">
         <input type="hidden" name="status" value="bukan">
 
         <div class="modal-header">
