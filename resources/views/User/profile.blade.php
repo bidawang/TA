@@ -16,7 +16,6 @@
                 <p class="mb-1"><strong>Role:</strong> {{ ucfirst($user->role) }}</p>
                 <p class="mb-1"><strong>Status:</strong> {{ ucfirst($user->status) }}</p>
                 <p class="mb-1"><strong>Phone:</strong> {{ $user->phone ?? 'Tidak ada' }}</p>
-                <p class="mb-1"><strong>Address:</strong> {{ $user->address ?? 'Tidak tersedia' }}</p>
             </div>
         </div>
     </div>

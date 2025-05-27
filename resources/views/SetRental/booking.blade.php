@@ -18,9 +18,10 @@
           <p class="mb-3 fw-semibold text-success">Harga per jam: Rp {{ number_format($setRental->harga_per_jam, 0, ',', '.') }}</p>
 
           <div class="mb-3">
+            @if($setRental->status == 'dipakai')
             <label class="form-label">Waktu Mulai</label>
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="start_option" id="selesaiRadio{{ $setRental->id }}" value="selesai" checked>
+              <input class="form-check-input" type="radio" name="start_option" id="selesaiRadio{{ $setRental->id }}" value="selesai" >
               <label class="form-check-label" for="selesaiRadio{{ $setRental->id }}">
                 Setelah pemain saat ini selesai
               </label>
@@ -31,6 +32,9 @@
                 Input manual waktu mulai
               </label>
             </div>
+            @elseif($setRental->status != 'dipakai')
+            <input type="hidden" name="start_option" value="manual" id="manualRadio{{ $setRental->id }}">
+            @endif
 
             <div class="row mt-2" id="manualInputs{{ $setRental->id }}" style="display: none;">
               <div class="col-6">

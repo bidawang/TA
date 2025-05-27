@@ -26,11 +26,11 @@
                 <h5 class="card-title mb-3 fw-bold" style="font-size: 1.25rem;">{{ $rental->nama }}</h5>
             </div>
 
-            @if(auth()->check() && in_array(auth()->user()->role, ['developer', 'admin']))
+            @if(auth()->check() && auth()->user()->role == 'developer' || auth()->user()->role == 'admin' && $rental->google_id == auth()->user()->google_id)
                 <a href="{{ route('rental.edit', $rental->id) }}" class="btn btn-warning w-100 mb-2">
                     <i class="bi bi-pencil me-1"></i> Edit
                 </a>
-            @elseif(auth()->check() && auth()->user()->role === 'user')
+            @elseif(auth()->check() && auth()->user()->role == 'user' || auth()->check() && auth()->user()->role == 'admin')
                 <a href="{{ route('setrental.index', ['rental_id' => $rental->id]) }}" class="btn btn-outline-danger w-100 mb-2">
                     <i class="bi bi-gear-wide-connected me-1 fs-6"></i> Set Rental
                 </a>
@@ -120,91 +120,99 @@
         </div>
     </div>
 
-    {{-- Komentar dan Rating --}}
-    <h5 class="mb-3 mt-4">Ulasan Pengguna</h5>
+{{-- Komentar dan Rating --}}
+<h5 class="mb-3 mt-4">Ulasan Pengguna</h5>
 
+@auth
     @php
-        $userGoogleId = auth()->check() ? auth()->user()->google_id : null;
-        $userAlreadyRated = $ratings->first(function ($rating) use ($userGoogleId, $rental) {
-            return $rating->user_id === $userGoogleId && $rating->rental_id === $rental->id;
-        });
+        $userGoogleId = auth()->user()->google_id;
+        $userAlreadyRated = $ratings->firstWhere('user_id', $userGoogleId);
     @endphp
 
-    @if (auth()->check())
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                @if (!$userAlreadyRated)
-                    <form action="{{ route('rating.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="rental_id" value="{{ $rental->id }}">
-                        <div class="mb-3">
-                            <label for="rating" class="form-label">Rating</label>
-                            <select name="rating" id="rating" class="form-select" required>
-                                <option value="">Pilih bintang</option>
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <option value="{{ $i }}">{{ $i }} Bintang</option>
-                                @endfor
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="komentar" class="form-label">Komentar</label>
-                            <textarea name="komentar" id="komentar" class="form-control" rows="2" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-send"></i> Kirim Ulasan
-                        </button>
-                    </form>
-                @else
-                    <form action="{{ route('rating.updateByUser', $userAlreadyRated->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="rental_id" value="{{ $rental->id }}">
-                        <div class="mb-3">
-                            <label for="rating" class="form-label">Edit Rating</label>
-                            <select name="rating" id="rating" class="form-select" required>
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <option value="{{ $i }}" {{ $userAlreadyRated->rating == $i ? 'selected' : '' }}>
-                                        {{ $i }} Bintang
-                                    </option>
-                                @endfor
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="komentar" class="form-label">Edit Komentar</label>
-                            <textarea name="komentar" id="komentar" class="form-control" rows="2" required>{{ $userAlreadyRated->komentar }}</textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-pencil-square"></i> Update Ulasan
-                        </button>
-                    </form>
-                @endif
-            </div>
-        </div>
-    @endif
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            @if (!$userAlreadyRated)
+                {{-- Form Kirim Ulasan --}}
+                <form action="{{ route('rating.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="rental_id" value="{{ $rental->id }}">
 
-    <div class="card shadow-sm mb-5">
-        <div class="card-body p-3">
-            @forelse ($ratings as $komentar)
-                <div class="mb-3">
-                    <h6 class="fw-bold mb-1">
-                        {{ $komentar->user->name ?? 'Pengguna' }}
-                        <small class="text-muted float-end">{{ $komentar->created_at->format('d M Y H:i') }}</small>
-                    </h6>
-
-                    <div class="mb-1">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <i class="bi bi-star{{ $i <= $komentar->rating ? '-fill text-warning' : '' }}"></i>
-                        @endfor
+                    <div class="mb-3">
+                        <label for="rating" class="form-label">Rating</label>
+                        <select name="rating" id="rating" class="form-select" required>
+                            <option value="">Pilih bintang</option>
+                            @for ($i = 1; $i <= 5; $i++)
+                                <option value="{{ $i }}">{{ $i }} Bintang</option>
+                            @endfor
+                        </select>
                     </div>
 
-                    <p class="mb-0">{{ $komentar->komentar }}</p>
-                </div>
-                <hr class="my-2">
-            @empty
-                <p class="text-muted text-center mb-0">Belum ada ulasan dari pengguna lain.</p>
-            @endforelse
+                    <div class="mb-3">
+                        <label for="komentar" class="form-label">Komentar</label>
+                        <textarea name="komentar" id="komentar" class="form-control" rows="2" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-send"></i> Kirim Ulasan
+                    </button>
+                </form>
+            @else
+                {{-- Form Edit Ulasan --}}
+                <form action="{{ route('rating.updateByUser', $userAlreadyRated->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="rental_id" value="{{ $rental->id }}">
+
+                    <div class="mb-3">
+                        <label for="rating" class="form-label">Edit Rating</label>
+                        <select name="rating" id="rating" class="form-select" required>
+                            @for ($i = 1; $i <= 5; $i++)
+                                <option value="{{ $i }}" {{ $userAlreadyRated->rating == $i ? 'selected' : '' }}>
+                                    {{ $i }} Bintang
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="komentar" class="form-label">Edit Komentar</label>
+                        <textarea name="komentar" id="komentar" class="form-control" rows="2" required>{{ $userAlreadyRated->komentar }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-pencil-square"></i> Update Ulasan
+                    </button>
+                </form>
+            @endif
         </div>
     </div>
+@endauth
+
+{{-- Tampilkan semua komentar --}}
+<div class="card shadow-sm mb-5">
+    <div class="card-body p-3">
+        @forelse ($ratings as $komentar)
+            <div class="mb-3">
+                <h6 class="fw-bold mb-1">
+                    {{ $komentar->user->name ?? 'Pengguna' }}
+                    <small class="text-muted float-end">{{ $komentar->created_at->format('d M Y H:i') }}</small>
+                </h6>
+
+                <div class="mb-1">
+                    @for ($i = 1; $i <= 5; $i++)
+                        <i class="bi bi-star{{ $i <= $komentar->rating ? '-fill text-warning' : '' }}"></i>
+                    @endfor
+                </div>
+
+                <p class="mb-0">{{ $komentar->komentar }}</p>
+            </div>
+            <hr class="my-2">
+        @empty
+            <p class="text-muted text-center mb-0">Belum ada ulasan dari pengguna lain.</p>
+        @endforelse
+    </div>
+</div>
+
 
 </div>
 

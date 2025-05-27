@@ -28,6 +28,8 @@ use App\Http\Controllers\Ajax;
 */
 
 Route::get('/', [Rental::class, 'dashboard'])->name('dashboard');
+Route::resource('user', User_C::class);
+Route::middleware(['auth', 'phone.verified'])->group(function () {
 
 Route::resource('rental', Rental::class);
 Route::resource('setrental', SetRental::class);
@@ -43,7 +45,6 @@ Route::resource('gameps', GamePS::class);
 Route::resource('rating', Rating::class);
 Route::put('ratingByUser/{id}', [Rating::class, 'updateByUser'])->name('rating.updateByUser');
 
-Route::resource('user', User_C::class);
 Route::get('user/{google_id}/profile', [User_C::class, 'profile'])->name('user.profile');
 Route::resource('transaksi', Transaksi::class);
 
@@ -69,3 +70,4 @@ Route::put('/setrental/{id}/maintenance', [SetRental::class, 'toMaintenance'])->
 Route::put('/setrental/{id}/aktifkan', [SetRental::class, 'toAktif'])->name('setrental.aktifkan');
 Route::get('/notifikasi/transaksi', [Ajax::class, 'getTransaksi'])->name('notifikasi.transaksi')->middleware('auth');
 
+});
