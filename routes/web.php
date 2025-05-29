@@ -29,9 +29,13 @@ use App\Http\Controllers\Ajax;
 
 Route::get('/', [Rental::class, 'dashboard'])->name('dashboard');
 Route::resource('user', User_C::class);
+Route::get('/auth/google/callback', [Google::class, 'handleGoogleCallback']);
+Route::get('/auth/google', [Google::class, 'redirectToGoogle'])->name('google.login');
+Route::post('/logout', [Google::class, 'logout'])->name('logout');
+Route::post('/callback/tripay', [Tripay::class, 'handle'])->name('tripay.callback');
 Route::middleware(['auth', 'phone.verified'])->group(function () {
-
 Route::resource('rental', Rental::class);
+
 Route::resource('setrental', SetRental::class);
 Route::put('/setrental/selesai/{id}', [SetRental::class, 'selesai'])->name('setrental.selesai');
 
@@ -48,11 +52,7 @@ Route::put('ratingByUser/{id}', [Rating::class, 'updateByUser'])->name('rating.u
 Route::get('user/{google_id}/profile', [User_C::class, 'profile'])->name('user.profile');
 Route::resource('transaksi', Transaksi::class);
 
-Route::get('/auth/google/callback', [Google::class, 'handleGoogleCallback']);
-Route::get('/auth/google', [Google::class, 'redirectToGoogle'])->name('google.login');
-Route::post('/logout', [Google::class, 'logout'])->name('logout');
 
-Route::post('/tripay/callback', [Tripay::class, 'handle'])->name('tripay.callback');
 
 Route::resource('riwayat', View::class);
 Route::resource('wallet', Wallet::class);

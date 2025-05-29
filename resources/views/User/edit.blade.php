@@ -12,15 +12,10 @@
                 <!-- Nomor Telepon -->
                 <div class="mb-3">
                     <label for="phone" class="form-label">Nomor Telepon</label>
-                    <input type="text" name="phone" id="phone" class="form-control" value="{{ old('phone', $user->phone) }}">
+                    <input type="text" name="phone" id="phone" class="form-control" value="{{ old('phone', $user->no_hp) }}">
                 </div>
 
-                <!-- Alamat -->
-                <div class="mb-3">
-                    <label for="address" class="form-label">Alamat</label>
-                    <textarea name="address" id="address" class="form-control">{{ old('address', $user->address) }}</textarea>
-                </div>
-
+@if(Auth::user()->role == 'developer')
                 <!-- Role -->
                 <div class="mb-3">
                     <label for="role" class="form-label">Role</label>
@@ -40,7 +35,7 @@
                         <option value="pending" {{ old('status', $user->status) == 'pending' ? 'selected' : '' }}>Pending</option>
                     </select>
                 </div>
-
+@endif
                 <!-- Button -->
                 <button type="submit" class="btn btn-primary">Simpan</button>
                 <a href="{{ route('user.show', $user->google_id) }}" class="btn btn-secondary">Batal</a>

@@ -18,7 +18,7 @@ class MetodePembayaran_M extends Model
 
     public function transaksi()
 {
-    return $this->belongsTo(Transaksi_M::class, 'id_transaksi');
+    return $this->hasOne(Transaksi_M::class, 'id_transaksi');
 }
 
 }

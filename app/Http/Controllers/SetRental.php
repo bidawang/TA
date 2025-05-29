@@ -187,7 +187,7 @@ public function toMaintenance($id)
 public function toAktif($id)
 {
     $set = SetRental_M::findOrFail($id);
-    $set->status = 'tersedia';
+    $set->status = 'tidak';
     $set->save();
 
     return back()->with('success', 'Set kembali tersedia.');

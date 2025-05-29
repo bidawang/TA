@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Wallet_M;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class User_C extends Controller
 {
@@ -35,20 +36,18 @@ public function show($google_id)
     // Validasi input
     $request->validate([
         'phone' => 'nullable|string|max:20',
-        'address' => 'nullable|string|max:255',
         'role' => 'nullable|in:user,admin,developer', // Validasi untuk role
         'status' => 'nullable|in:aktif,nonaktif,pending', // Validasi untuk status
     ]);
 
     // Cari user berdasarkan google_id
     $user = User::findOrFail($id);
-
+// dd($request);
     // Update data user
     $user->update([
-        'phone' => $request->phone,
-        'address' => $request->address,
-        'role' => $request->role,    // Update role
-        'status' => $request->status, // Update status
+        'no_hp' => $request->phone,
+        'role' => $request->role ?? Auth::user()->role ?? 'user',    // Update role
+        'status' => Auth::user()->status, // Update status
     ]);
 
     // Redirect ke halaman detail user dengan pesan sukses

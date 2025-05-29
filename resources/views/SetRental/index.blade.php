@@ -50,7 +50,7 @@
     @endforeach
   </div>
 </div>
-@if(auth()->user()->role != 'admin')
+@if(auth()->user()->role != 'user')
 <div class="tab-pane fade" id="maintenance" role="tabpanel">
   <div class="row g-3">
     @foreach ($setRentals->where('status', 'maintenance') as $setRental)
@@ -66,65 +66,77 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Script perhitungan total harga
-    document.querySelectorAll('.jumlah-jam').forEach(function (input) {
-      input.addEventListener('input', function () {
-        const jumlahJam = parseInt(this.value) || 0;
-        const hargaPerJam = parseInt(this.dataset.harga) || 0;
-        const totalHarga = jumlahJam * hargaPerJam;
-
-        const id = this.dataset.id;
-        const totalHargaField = document.getElementById('totalHarga' + capitalizeFirstLetter(id));
-
-        if (totalHargaField) {
-          totalHargaField.value = 'Rp ' + totalHarga.toLocaleString('id-ID');
-        }
-      });
+  // Perhitungan total harga saat jumlah jam diubah
+  document.querySelectorAll('.jumlah-jam').forEach(function (input) {
+    input.addEventListener('input', function () {
+      const jumlahJam = parseInt(this.value) || 0;
+      const hargaPerJam = parseInt(this.dataset.harga) || 0;
+      const totalHarga = jumlahJam * hargaPerJam;
+      const id = this.dataset.id;
+      const totalHargaField = document.getElementById('totalHarga' + capitalizeFirstLetter(id));
+      if (totalHargaField) {
+        totalHargaField.value = 'Rp ' + totalHarga.toLocaleString('id-ID');
+      }
     });
+  });
 
-    // Script untuk toggle input manual waktu
-    @foreach ($setRentals as $setRental)
-      const selesaiRadio{{ $setRental->id }} = document.getElementById('selesaiRadio{{ $setRental->id }}');
-      const manualRadio{{ $setRental->id }} = document.getElementById('manualRadio{{ $setRental->id }}');
-      const manualInputs{{ $setRental->id }} = document.getElementById('manualInputs{{ $setRental->id }}');
+  // Toggle input manual waktu
+  @foreach ($setRentals as $setRental)
+    const selesaiRadio{{ $setRental->id }} = document.getElementById('selesaiRadio{{ $setRental->id }}');
+    const manualRadio{{ $setRental->id }} = document.getElementById('manualRadio{{ $setRental->id }}');
+    const manualInputs{{ $setRental->id }} = document.getElementById('manualInputs{{ $setRental->id }}');
 
-      if (selesaiRadio{{ $setRental->id }} && manualRadio{{ $setRental->id }} && manualInputs{{ $setRental->id }}) {
-        selesaiRadio{{ $setRental->id }}.addEventListener('change', function () {
-          if (this.checked) {
-            manualInputs{{ $setRental->id }}.style.display = 'none';
-          }
-        });
-        manualRadio{{ $setRental->id }}.addEventListener('change', function () {
-          if (this.checked) {
-            manualInputs{{ $setRental->id }}.style.display = 'flex'; // ditampilkan dalam flex row
+    if (manualInputs{{ $setRental->id }}) {
+      // Jika hanya ada opsi manual, tampilkan langsung
+      @if($setRental->status != 'dipakai')
+        manualInputs{{ $setRental->id }}.style.display = 'flex';
+      @else
+        // Toggle manual/otomatis berdasarkan pilihan radio
+        if (manualRadio{{ $setRental->id }}) {
+          manualRadio{{ $setRental->id }}.addEventListener('change', function () {
+            if (this.checked) {
+              manualInputs{{ $setRental->id }}.style.display = 'flex';
+            }
+          });
+        }
+
+        if (selesaiRadio{{ $setRental->id }}) {
+          selesaiRadio{{ $setRental->id }}.addEventListener('change', function () {
+            if (this.checked) {
+              manualInputs{{ $setRental->id }}.style.display = 'none';
+            }
+          });
+        }
+      @endif
+    }
+  @endforeach
+
+  function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+});
+</script>
+
+<script>
+  // Inisialisasi Select2 di dalam modal saat tampil
+  $(document).ready(function () {
+    $('div.modal').on('shown.bs.modal', function () {
+      const $select = $(this).find('select.select2-modal');
+      if ($select.length && !$select.hasClass("select2-hidden-accessible")) {
+        $select.select2({
+          dropdownParent: $(this),
+          templateResult: function (data) {
+            if (!data.id) return data.text;
+            return $(`<span><img src="${$(data.element).data('icon')}" style="width:20px; margin-right:8px;" /> ${data.text}</span>`);
+          },
+          templateSelection: function (data) {
+            if (!data.id) return data.text;
+            return $(`<span><img src="${$(data.element).data('icon')}" style="width:20px; margin-right:8px;" /> ${data.text}</span>`);
           }
         });
       }
-    @endforeach
-
-    function capitalizeFirstLetter(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    }
+    });
   });
-
-// Inisialisasi Select2 saat modal tampil
-$(document).ready(function () {
-  $('div.modal').on('shown.bs.modal', function () {
-    const $select = $(this).find('select.select2-modal');
-    if ($select.length && !$select.hasClass("select2-hidden-accessible")) {
-      $select.select2({
-        dropdownParent: $(this),
-        templateResult: function (data) {
-          if (!data.id) return data.text;
-          return $(`<span><img src="${$(data.element).data('icon')}" style="width:20px; margin-right:8px;" /> ${data.text}</span>`);
-        },
-        templateSelection: function (data) {
-          if (!data.id) return data.text;
-          return $(`<span><img src="${$(data.element).data('icon')}" style="width:20px; margin-right:8px;" /> ${data.text}</span>`);
-        }
-      });
-    }
-  });
-});
 </script>
+
 @endpush

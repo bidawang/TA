@@ -50,7 +50,12 @@ class Google extends Controller
 
         // Login user
         Auth::login($user);
-
+$rental = \App\Models\Rental_M::where('google_id', $user->google_id)->first();
+        // dd($rental);
+        // Simpan ke session kalau ada
+        if ($rental) {
+            session(['id_rental' => $rental->id]);
+        }
         // Validasi no_hp setelah login
         $cleanPhone = preg_replace('/\D/', '', $user->no_hp);
         if (empty($cleanPhone) || $user->no_hp == NULL || strlen($cleanPhone) < 10 || strlen($cleanPhone) > 14) {
@@ -58,18 +63,12 @@ class Google extends Controller
         }
 
         // Ambil data rental (jika ada)
-        $rental = \App\Models\Rental_M::where('google_id', $user->google_id)->first();
-
-        // Simpan ke session kalau ada
-        if ($rental) {
-            session(['id_rental' => $rental->id]);
-        }
-
+        
         return redirect()->route('dashboard');
 
     }catch (\Exception $e) {
     Log::error('Google Login Error: ' . $e->getMessage());
-    return redirect()->route('login')->with('error', 'Gagal login. Coba lagi nanti.');
+    return redirect()->route('dashboard')->with('error', 'Gagal login. Coba lagi nanti.');
 }
 
 }
