@@ -2,45 +2,41 @@
 
 @section('content')
 <div class="container">
-    <h1>Daftar TV</h1>
-    <a href="{{ route('tv.create') }}" class="btn btn-primary mb-3">Tambah TV</a>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Daftar TV</h5>
+    <a href="{{ route('tv.create') }}" class="btn btn-sm btn-primary">+ Tambah</a>
+  </div>
 
-    @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+  @if (session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+  @endif
 
-    <div class="table-responsive small">
-        <table class="table table-bordered table-striped align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>No</th>
-                    <th>Merek</th>
-                    <th>Ukuran</th>
-                    <th style="width: 150px;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($tvList as $index => $tv)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $tv->merek }}</td>
-                        <td>{{ $tv->ukuran }}"</td>
-                        <td>
-                            <a href="{{ route('tv.edit', $tv->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                            <form action="{{ route('tv.destroy', $tv->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center">Belum ada data TV.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+  @forelse ($tvList as $tv)
+    <div class="card mb-2 shadow-sm">
+      <div class="card-body p-3 d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ $tv->merek }}</strong><br>
+          <small class="text-muted">Ukuran: {{ $tv->ukuran }}″</small>
+        </div>
+        @if($tv->setrental)
+  <span class="badge bg-success">{{ $tv->setrental->name }}</span>
+@else
+  <span class="badge bg-secondary">Belum dipakai</span>
+@endif
+
+
+        <div class="text-end">
+          <a href="{{ route('tv.edit', $tv->id) }}" class="btn btn-sm btn-outline-warning mb-1">✏️</a>
+          <form action="{{ route('tv.destroy', $tv->id) }}" method="POST" class="d-inline">
+            @csrf
+            @method('DELETE')
+            <button onclick="return confirm('Hapus TV ini?')" class="btn btn-sm btn-outline-danger">🗑</button>
+          </form>
+        </div>
+      </div>
     </div>
+  @empty
+    <p class="text-muted text-center">Belum ada data TV.</p>
+  @endforelse
 </div>
 @endsection

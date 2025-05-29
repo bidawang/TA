@@ -18,8 +18,9 @@ class TV_M extends Model
         'google_id',
     ];
 
-    public function setrental()
+        public function setrental()
     {
-        return $this->hasMany(SetRental_M::class);
+    return $this->hasOne(SetRental_M::class, 'ps_id', 'id');
     }
+
 }

@@ -19,4 +19,5 @@
         <a href="{{ route('setrental.index', ['rental_id' => $setRental->rental_id]) }}" class="btn btn-secondary">Kembali</a>
     </div>
 </div>
+
 @endsection

@@ -41,5 +41,9 @@ class SetRental_M extends Model
     return $this->hasMany(Transaksi_M::class, 'id_set_rental', 'id')->latest();
 }
 
+public function storages()
+{
+    return $this->hasMany(Storage_M::class, 'id_ps', 'ps_id');
+}
 
 }

@@ -13,7 +13,8 @@ class TV extends Controller
     $idRental = session('id_rental');
     $googleId = Auth::user()->google_id;
 
-    $tvList = TV_M::where('id_rental', $idRental)
+    $tvList = TV_M::with('setrental')
+                ->where('id_rental', $idRental)
                  ->where('google_id', $googleId)
                  ->get();
 

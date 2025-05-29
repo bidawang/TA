@@ -26,19 +26,33 @@ class SetRental extends Controller
 
     return []; // fallback jika gagal
 }
-    public function index(Request $request)
+ public function index(Request $request)
 {
     $rental_id = $request->query('rental_id');
-    $query = SetRental_M::with(['tv', 'ps', 'rental', 'transaksi'])->where('rental_id', $rental_id);
-    
-    // dd($query);
+
+    $query = SetRental_M::with(['tv', 'ps', 'rental', 'transaksi', 'storages']); 
+    // games nggak bisa eager loading langsung karena beda koneksi DB, diganti 'storages'
+
     if ($rental_id) {
         $query->where('rental_id', $rental_id);
     }
+
     $setRentals = $query->get();
-    // Panggil Tripay
+
+    // Ambil games manual per setRental, karena beda koneksi DB
+    foreach ($setRentals as $setRental) {
+        $games = collect();
+        foreach ($setRental->storages as $storage) {
+            $game = \App\Models\Game_M::find($storage->id_game);
+            if ($game) {
+                $games->push($game);
+            }
+        }
+        $setRental->games = $games; // attach games secara manual ke tiap item
+    }
+
     $channels = $this->getTripayChannels();
-    // Kirim ke view
+
     return view('setrental.index', [
         'setRentals' => $setRentals,
         'rental_id' => $rental_id,
@@ -46,6 +60,7 @@ class SetRental extends Controller
         'userGoogleId' => auth()->user()->google_id ?? null,
     ]);
 }
+
 
 
     public function create(Request $request)
@@ -72,7 +87,6 @@ class SetRental extends Controller
     $ps = PS_M::where('id', $usedPsIds)->get();
     return view('setrental.create', compact('tvs', 'ps', 'rental_id'));
 }
-
 
     public function store(Request $request)
 {
@@ -109,10 +123,11 @@ class SetRental extends Controller
     
 
     public function show($id)
-    {
-        $setRental = SetRental_M::with(['tv', 'ps'])->findOrFail($id);
-        return view('setrental.show', compact('setRental'));
-    }
+{
+    $setRental = SetRental_M::with(['tv', 'ps', 'games'])->findOrFail($id);
+    return view('setrental.show', compact('setRental'));
+}
+
 
     public function edit($id)
     {

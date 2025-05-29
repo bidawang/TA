@@ -40,11 +40,9 @@
           </div>
 
           {{-- Tombol info --}}
-          @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
             <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detailModal{{ $setRental->id }}" title="Lihat detail">
               <i class="bi bi-info-circle"></i>
             </button>
-          @endif
         </div>
       </div>
 
@@ -90,6 +88,32 @@
             </div>
         </div>
     @endif
+@if($setRental->games->isNotEmpty())
+  <div class="accordion mt-2" id="gamesAccordion{{ $setRental->id }}">
+    <div class="accordion-item border-0">
+      <h2 class="accordion-header" id="headingGames{{ $setRental->id }}">
+        <button class="accordion-button collapsed px-2 py-1 small" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseGames{{ $setRental->id }}"
+                aria-expanded="false" aria-controls="collapseGames{{ $setRental->id }}">
+          🎮 Daftar Game
+        </button>
+      </h2>
+      <div id="collapseGames{{ $setRental->id }}" class="accordion-collapse collapse"
+           data-bs-parent="#gamesAccordion{{ $setRental->id }}">
+        <div class="accordion-body p-2">
+          <ul class="list-group list-group-flush small">
+            @foreach($setRental->games as $game)
+              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                {{ $game->name ?? 'Game tidak diketahui' }}
+              </li>
+            @endforeach
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+@endif
 
     {{-- Jadwal User --}}
     @if($setRental->transaksi->where('google_id', $userGoogleId)->isNotEmpty())
@@ -135,9 +159,12 @@
         </div>
         <div class="modal-body text-muted small">
           <p><strong>TV:</strong> {{ $setRental->tv->merek ?? '-' }}</p>
-          <p><strong>PS:</strong> {{ $setRental->ps->model_ps ?? '-' }}</p>
+          <p><strong>PS:</strong> {{ $setRental->ps->model_ps ?? '-' }} {{ $setRental->ps->seri ?? '' }} </p>
+          <p><strong>Penyimpanan:</strong> {{ $setRental->ps->storage ?? '-' }}</p>
           <p><strong>Harga per jam:</strong> Rp {{ number_format($setRental->harga_per_jam, 0, ',', '.') }}</p>
         </div>
+                  @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
+
         <div class="modal-footer border-0 d-flex justify-content-between">
           <form action="{{ route('setrental.destroy', $setRental->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
             @csrf @method('DELETE')
@@ -148,6 +175,8 @@
             <a href="{{ route('setrental.show', $setRental->id) }}" class="btn btn-sm btn-outline-info">Detail</a>
           </div>
         </div>
+                  @endif
+
       </div>
     </div>
   </div>

@@ -60,6 +60,31 @@
 </div>
 @endif
 </div> <!-- penutup .tab-content -->
+@if(auth()->check())
+<div class="bottom-action d-flex justify-content-between gap-2 bg-white py-3 px-3 border-top rounded shadow-sm">
+    @if(auth()->user()->role === 'developer')
+        <a href="{{ route('setrental.index', ['rental_id' => $rental->id]) }}" class="btn-sm btn btn-outline-danger flex-fill text-center">
+        <i class="bi bi-gear-wide-connected me-1 fs-6"></i> Set Rental
+        </a>
+        <a href="{{ route('fasilitas.index', ['rental_id' => $rental->id]) }}" class="btn-sm btn btn-outline-danger flex-fill text-center">
+        <i class="bi bi-sliders2 me-1 fs-6"></i> Fasilitas
+        </a>
+        <a href="{{ route('galeri.index', ['rental_id' => $rental->id]) }}" class="btn-sm btn btn-outline-danger flex-fill text-center">
+            <i class="bi bi-images me-1 fs-6"></i> Galeri
+        </a>
+        <a href="{{ route('pendapatan', ['id' => $rental->id]) }}" class="btn-sm btn btn-outline-danger flex-fill text-center">
+        <i class="bi bi-currency-dollar me-1 fs-6"></i> Pendapatan
+        </a>
+    @elseif(auth()->user()->role === 'admin')
+        <a href="{{ route('ps.index') }}" class="btn-sm btn btn-outline-danger flex-fill text-center">
+        <i class="bi bi-sliders2 me-1 fs-6"></i> PS
+        </a>
+        <a href="{{ route('tv.index') }}" class="btn-sm btn btn-outline-danger flex-fill text-center">
+        <i class="bi bi-images me-1 fs-6"></i> TV
+        </a>
+    @endif
+</div>
+@endif
 
 @endsection
 

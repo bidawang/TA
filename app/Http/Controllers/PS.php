@@ -13,14 +13,18 @@ use Illuminate\Http\Request;
 class PS extends Controller
 {
     public function index()
-    {
-        $idRental = session('id_rental');
+{
+    $idRental = session('id_rental');
     $googleId = Auth::user()->google_id;
-        $psList = PS_M::where('id_rental', $idRental)
-                 ->where('google_id', $googleId)
-                 ->get();
-        return view('ps.index', compact('psList'));
-    }
+
+    $psList = PS_M::with('setrental') // <--- ini penting
+                ->where('id_rental', $idRental)
+                ->where('google_id', $googleId)
+                ->get();
+
+    return view('ps.index', compact('psList'));
+}
+
 
     public function create()
     {
