@@ -48,13 +48,14 @@
 
       {{-- Aksi --}}
       <div class="d-flex flex-column gap-1 text-end">
-        @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
+        @if(auth()->check() && auth()->user()?->role === 'developer' || auth()->check() && auth()->user()?->role === 'admin')
           @if($setRental->status !== 'dipakai')
             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pakaiModal{{ $setRental->id }}">🚀 Pakai</button>
           @endif
-        @endif
-        <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bookingModal{{ $setRental->id }}">🛒 Booking</button>
-        @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
+          @elseif(auth()->check())
+          <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bookingModal{{ $setRental->id }}">🛒 Booking</button>
+          @endif
+        @if(auth()->check() && auth()->user()?->role === 'developer' || auth()->check() && auth()->user()?->role === 'admin')
     <form action="{{ $setRental->status === 'maintenance' ? route('setrental.aktifkan', $setRental->id) : route('setrental.maintenance', $setRental->id) }}"
           method="POST" class="form-switch mt-2 text-end">
         @csrf
@@ -73,9 +74,8 @@
 
       </div>
     </div>
-
-    {{-- Status Dipakai --}}
-    @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
+{{-- Status Dipakai --}}
+@if(auth()->check() && (auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin'))
     @if($setRental->status === 'dipakai')
         <div class="text-danger p-2 small d-flex justify-content-between align-items-center">
             <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#selesaiModal{{ $setRental->id }}">Selesai</button>
@@ -88,61 +88,64 @@
             </div>
         </div>
     @endif
-@if($setRental->games->isNotEmpty())
-  <div class="accordion mt-2" id="gamesAccordion{{ $setRental->id }}">
-    <div class="accordion-item border-0">
-      <h2 class="accordion-header" id="headingGames{{ $setRental->id }}">
-        <button class="accordion-button collapsed px-2 py-1 small" type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapseGames{{ $setRental->id }}"
-                aria-expanded="false" aria-controls="collapseGames{{ $setRental->id }}">
-          🎮 Daftar Game
-        </button>
-      </h2>
-      <div id="collapseGames{{ $setRental->id }}" class="accordion-collapse collapse"
-           data-bs-parent="#gamesAccordion{{ $setRental->id }}">
-        <div class="accordion-body p-2">
-          <ul class="list-group list-group-flush small">
-            @foreach($setRental->games as $game)
-              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                {{ $game->name ?? 'Game tidak diketahui' }}
-              </li>
-            @endforeach
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
 @endif
 
-    {{-- Jadwal User --}}
-    @if($setRental->transaksi->where('google_id', $userGoogleId)->isNotEmpty())
-        <div class="accordion mt-2" id="transaksiAccordion{{ $setRental->id }}">
-            <div class="accordion-item border-0">
-                <h2 class="accordion-header" id="headingTrans{{ $setRental->id }}">
-                    <button class="accordion-button collapsed px-2 py-1 small" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapseTrans{{ $setRental->id }}" aria-expanded="false"
-                            aria-controls="collapseTrans{{ $setRental->id }}">
-                        📄 Jadwal Anda
-                    </button>
-                </h2>
-                <div id="collapseTrans{{ $setRental->id }}" class="accordion-collapse collapse"
-                     data-bs-parent="#transaksiAccordion{{ $setRental->id }}">
-                    <div class="accordion-body p-2">
-                        @foreach($setRental->transaksi->where('google_id', $userGoogleId) as $trans)
-                            <div class="border rounded p-2 mb-2 bg-light shadow-sm">
-                                <div class="d-flex justify-content-between small mb-1">
-                                    <span class="fw-semibold">🕒 {{ \Carbon\Carbon::parse($trans->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($trans->jam_selesai)->format('H:i') }}</span>
-                                    <span>{{ $trans->jumlah_jam }} jam</span>
-                                </div>
-                            </div>
+{{-- Daftar Game --}}
+@if($setRental->games->isNotEmpty())
+    <div class="accordion mt-2" id="gamesAccordion{{ $setRental->id }}">
+        <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="headingGames{{ $setRental->id }}">
+                <button class="accordion-button collapsed px-2 py-1 small" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseGames{{ $setRental->id }}"
+                        aria-expanded="false" aria-controls="collapseGames{{ $setRental->id }}">
+                    🎮 Daftar Game
+                </button>
+            </h2>
+            <div id="collapseGames{{ $setRental->id }}" class="accordion-collapse collapse"
+                data-bs-parent="#gamesAccordion{{ $setRental->id }}">
+                <div class="accordion-body p-2">
+                    <ul class="list-group list-group-flush small">
+                        @foreach($setRental->games as $game)
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                {{ $game->name ?? 'Game tidak diketahui' }}
+                            </li>
                         @endforeach
-                    </div>
+                    </ul>
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 @endif
+
+{{-- Jadwal User --}}
+@if(auth()->check() && $setRental->transaksi->where('google_id', $userGoogleId)->isNotEmpty())
+    <div class="accordion mt-2" id="transaksiAccordion{{ $setRental->id }}">
+        <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="headingTrans{{ $setRental->id }}">
+                <button class="accordion-button collapsed px-2 py-1 small" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseTrans{{ $setRental->id }}" aria-expanded="false"
+                        aria-controls="collapseTrans{{ $setRental->id }}">
+                    📄 Jadwal Anda
+                </button>
+            </h2>
+            <div id="collapseTrans{{ $setRental->id }}" class="accordion-collapse collapse"
+                data-bs-parent="#transaksiAccordion{{ $setRental->id }}">
+                <div class="accordion-body p-2">
+                    @foreach($setRental->transaksi->where('google_id', $userGoogleId) as $trans)
+                        <div class="border rounded p-2 mb-2 bg-light shadow-sm">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="fw-semibold">🕒 {{ \Carbon\Carbon::parse($trans->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($trans->jam_selesai)->format('H:i') }}</span>
+                                <span>{{ $trans->jumlah_jam }} jam</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
   </div>
 
   {{-- Modal --}}
@@ -163,7 +166,7 @@
           <p><strong>Penyimpanan:</strong> {{ $setRental->ps->storage ?? '-' }}</p>
           <p><strong>Harga per jam:</strong> Rp {{ number_format($setRental->harga_per_jam, 0, ',', '.') }}</p>
         </div>
-                  @if(auth()->user()?->role === 'developer' || auth()->user()?->role === 'admin')
+                  @if(auth()->check() && auth()->user()?->role === 'developer' || auth()->check() && auth()->user()?->role === 'admin')
 
         <div class="modal-footer border-0 d-flex justify-content-between">
           <form action="{{ route('setrental.destroy', $setRental->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">

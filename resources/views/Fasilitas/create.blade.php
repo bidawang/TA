@@ -20,11 +20,6 @@
             <input type="file" class="form-control" id="foto_fasilitas" name="foto_fasilitas" accept="image/*">
         </div>
 
-        <div class="mb-3">
-            <label for="google_id" class="form-label">Google ID (optional)</label>
-            <input type="text" class="form-control" id="google_id" name="google_id">
-        </div>
-
         <button type="submit" class="btn btn-success">Simpan</button>
         <a href="{{ route('fasilitas.index') }}" class="btn btn-secondary">Kembali</a>
     </form>

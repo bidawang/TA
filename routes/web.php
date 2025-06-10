@@ -33,18 +33,15 @@ Route::get('/auth/google/callback', [Google::class, 'handleGoogleCallback']);
 Route::get('/auth/google', [Google::class, 'redirectToGoogle'])->name('google.login');
 Route::post('/logout', [Google::class, 'logout'])->name('logout');
 Route::post('/callback/tripay', [Tripay::class, 'handle'])->name('tripay.callback');
-Route::middleware(['auth', 'phone.verified'])->group(function () {
 Route::resource('rental', Rental::class);
-
 Route::resource('setrental', SetRental::class);
+Route::middleware(['auth', 'phone.verified'])->group(function () {
 Route::put('/setrental/selesai/{id}', [SetRental::class, 'selesai'])->name('setrental.selesai');
-
 Route::resource('fasilitas', Fasilitas::class);
 Route::resource('galeri', Galeri::class);
 Route::resource('ps', PS::class);
 Route::resource('tv', TV::class);
 Route::post('/gameps/bulk-delete', [GamePS::class, 'bulkDelete'])->name('gameps.bulkDelete');
-
 Route::resource('gameps', GamePS::class);
 Route::resource('rating', Rating::class);
 Route::put('ratingByUser/{id}', [Rating::class, 'updateByUser'])->name('rating.updateByUser');

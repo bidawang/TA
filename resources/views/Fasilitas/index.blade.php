@@ -8,9 +8,6 @@
     <a href="{{ route('fasilitas.create',['rental_id' => $rental_id]) }}" class="btn btn-primary mb-3">Tambah Fasilitas</a>
 
     <!-- Jika ada rental_id, tampilkan filter -->
-    @if ($rental_id)
-    <h3>Fasilitas untuk Rental ID: {{ $rental_id }}</h3>
-    @endif
 
     <!-- Menampilkan daftar fasilitas -->
     <div class="row">

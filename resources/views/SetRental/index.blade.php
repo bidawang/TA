@@ -26,7 +26,7 @@
   <li class="nav-item" role="presentation">
     <button class="nav-link" id="dipakai-tab" data-bs-toggle="tab" data-bs-target="#dipakai" type="button" role="tab">Dipakai</button>
   </li>
-  @if(auth()->user()->role != 'user')
+  @if(auth()->check() && auth()->user()->role != 'user')
 
   <li class="nav-item" role="presentation">
     <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance" type="button" role="tab">Maintenance</button>
@@ -50,7 +50,7 @@
     @endforeach
   </div>
 </div>
-@if(auth()->user()->role != 'user')
+@if(auth()->check() && auth()->user()->role != 'user')
 <div class="tab-pane fade" id="maintenance" role="tabpanel">
   <div class="row g-3">
     @foreach ($setRentals->where('status', 'maintenance') as $setRental)

@@ -22,7 +22,7 @@
       <label>Foto</label>
       <input type="file" name="foto" class="form-control">
       @if (!empty($ps->foto))
-        <img src="{{ asset('storage/' . $ps->foto) }}" class="mt-2" style="max-width: 100px;">
+      <img src="{{ asset('storage/' . $ps->foto) }}" class="mt-2" style="max-width: 100px;">
       @endif
     </div>
     <button type="submit" class="btn btn-primary">Update</button>

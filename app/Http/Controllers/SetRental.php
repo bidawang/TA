@@ -81,10 +81,11 @@ class SetRental extends Controller
         ->toArray();
 
     // Ambil TV yang belum dipakai
-    $tvs = TV_M::where('id', $usedTvIds)->get();
+    $tvs = TV_M::whereNotIn('id', $usedTvIds)->get();
 
     // Ambil PS yang belum dipakai
-    $ps = PS_M::where('id', $usedPsIds)->get();
+    $ps = PS_M::whereNotIn('id', $usedPsIds)->get();
+    
     return view('setrental.create', compact('tvs', 'ps', 'rental_id'));
 }
 

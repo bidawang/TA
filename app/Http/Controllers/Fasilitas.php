@@ -53,8 +53,8 @@ public function create(Request $request)
         // Menyimpan fasilitas baru
         Fasilitas_M::create([
             'nama_fasilitas' => $request->nama_fasilitas,
-            'id_rental' => $request->id_rental,
-            'google_id' => $request->google_id, // Jika ada
+            'id_rental' => session('id_rental'),
+            'google_id' => Auth::user()->google_id, // Jika ada
             'foto_fasilitas' => $foto_fasilitas
         ]);
 
@@ -80,11 +80,7 @@ public function create(Request $request)
     public function update(Request $request, $id)
     {
         // Validasi inputan
-        $request->validate([
-            'nama_fasilitas' => 'required|string|max:255',
-            'id_rental' => 'required|exists:rental_m,id',
-            'foto_fasilitas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        
 
         $fasilitas = Fasilitas_M::findOrFail($id);
 
@@ -102,8 +98,8 @@ public function create(Request $request)
         // Update data fasilitas
         $fasilitas->update([
             'nama_fasilitas' => $request->nama_fasilitas,
-            'id_rental' => $request->id_rental,
-            'google_id' => $request->google_id, // Jika ada
+            'id_rental' => session('id_rental'),
+            'google_id' => Auth::user()->google_id, // Jika ada
             'foto_fasilitas' => $foto_fasilitas
         ]);
 

@@ -13,11 +13,11 @@
             <select name="provider" id="provider" class="form-select @error('provider') is-invalid @enderror" required>
                 <option value="">-- Pilih Provider --</option>
                 @foreach ($providers as $key => $label)
-                    <option value="{{ $key }}" {{ $wallet->provider === $key ? 'selected' : '' }}>{{ $label }}</option>
+                <option value="{{ $key }}" {{ $wallet->provider === $key ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
             </select>
             @error('provider')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
@@ -25,7 +25,7 @@
             <label for="kode_provider" class="form-label">Kode Provider</label>
             <input type="text" id="kode_provider" name="kode_provider" class="form-control @error('kode_provider') is-invalid @enderror" value="{{ old('kode_provider', $wallet->kode_provider) }}" required>
             @error('kode_provider')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 

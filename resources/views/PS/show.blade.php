@@ -6,7 +6,7 @@
 
     <div class="card shadow-sm mx-auto" style="max-width: 600px;">
         @if ($ps->foto)
-            <img src="{{ asset('storage/' . $ps->foto) }}" class="card-img-top" alt="Foto PS" style="max-height: 300px; object-fit: contain;">
+        <img src="{{ asset('storage/' . $ps->foto) }}" class="card-img-top" alt="Foto PS" style="max-height: 300px; object-fit: contain;">
         @endif
 
         <div class="card-body">
@@ -26,7 +26,7 @@
                         <label for="games" class="form-label">Pilih Game</label>
                         <select name="games[]" id="games" class="form-select select2" multiple>
                             @foreach($games as $game)
-                                <option value="{{ $game->id }}">{{ $game->name }}</option>
+                            <option value="{{ $game->id }}">{{ $game->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -46,23 +46,23 @@
                     </div>
                 </div>
 
-                 <form action="{{ route('gameps.bulkDelete') }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus game yang dipilih?')">
+                <form action="{{ route('gameps.bulkDelete') }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus game yang dipilih?')">
                     @csrf
                     <ul id="ownedGamesList" class="list-group">
                         @forelse($ownedGames as $owned)
-                            <li class="list-group-item d-flex align-items-center owned-game-item">
-                                <input type="checkbox" name="selected_games[]" value="{{ $owned->id }}" class="form-check-input me-2 game-checkbox">
-                                <span class="game-name">{{ $owned->game->name }}</span>
-                            </li>
+                        <li class="list-group-item d-flex align-items-center owned-game-item">
+                            <input type="checkbox" name="selected_games[]" value="{{ $owned->id }}" class="form-check-input me-2 game-checkbox">
+                            <span class="game-name">{{ $owned->game->name }}</span>
+                        </li>
                         @empty
-                            <li class="list-group-item text-center text-muted">Belum ada game yang ditambahkan</li>
+                        <li class="list-group-item text-center text-muted">Belum ada game yang ditambahkan</li>
                         @endforelse
                     </ul>
 
                     @if($ownedGames->count())
-                        <button type="submit" class="btn btn-danger btn-sm mt-3 w-100">Hapus Game Terpilih</button>
+                    <button type="submit" class="btn btn-danger btn-sm mt-3 w-100">Hapus Game Terpilih</button>
                     @endif
-                </form> 
+                </form>
             </div>
 
             <a href="{{ route('ps.index') }}" class="btn btn-secondary w-100 mt-4">Kembali</a>
@@ -73,29 +73,29 @@
 
 @push('scripts')
 <script>
-$(document).ready(function () {
-    $('.select2').select2({
-        placeholder: "Pilih game yang tersedia",
-        width: '100%'
-    });
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Pilih game yang tersedia",
+            width: '100%'
+        });
 
-    $('#searchGame').on('input', function () {
-        const keyword = $(this).val().toLowerCase().trim();
-        $('#ownedGamesList .owned-game-item').each(function () {
-            const gameName = $(this).find('.game-name').text().toLowerCase();
-            $(this).toggle(gameName.includes(keyword));
+        $('#searchGame').on('input', function() {
+            const keyword = $(this).val().toLowerCase().trim();
+            $('#ownedGamesList .owned-game-item').each(function() {
+                const gameName = $(this).find('.game-name').text().toLowerCase();
+                $(this).toggle(gameName.includes(keyword));
+            });
+        });
+
+        $('#selectAll').on('change', function() {
+            $('.game-checkbox').prop('checked', this.checked);
+        });
+
+        $(document).on('change', '.game-checkbox', function() {
+            if (!$(this).is(':checked')) {
+                $('#selectAll').prop('checked', false);
+            }
         });
     });
-
-    $('#selectAll').on('change', function () {
-        $('.game-checkbox').prop('checked', this.checked);
-    });
-
-    $(document).on('change', '.game-checkbox', function () {
-        if (!$(this).is(':checked')) {
-            $('#selectAll').prop('checked', false);
-        }
-    });
-});
 </script>
 @endpush

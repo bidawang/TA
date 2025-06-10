@@ -12,101 +12,101 @@ use Illuminate\Support\Facades\Auth;
 class Wallet extends Controller
 {
     public function index()
-{
-    $wallet = WalletLogs_M::where('type', 'out', 'penolakan')->get();
+    {
+        $wallet = WalletLogs_M::where('type', 'out', 'penolakan')->get();
 
-    return view('wallet.index', compact('wallet'));
-}
+        return view('wallet.index', compact('wallet'));
+    }
 
 
-            public function create()
-            {
-                $providers = [
-                    'GOPAY' => 'GoPay',
-                    'OVO' => 'OVO',
-                    'DANA' => 'DANA',
-                    'SHOPEEPAY' => 'ShopeePay',
-                    'LINKAJA' => 'LinkAja',
-                ];
-            
-                return view('wallet.create', compact('providers'));
-            }
-            
-        
-            public function store(Request $request)
-            {
-                $request->validate([
-                    'provider' => 'required|string',
-                    'kode_provider' => 'required|string',
-                ]);
-            
-                $googleId = auth()->user()->google_id; // atau sesuai auth guard kamu
-                $idRental = session('id_rental'); // pastikan sudah disimpan sebelumnya
-            
-                Wallet_M::create([
-                    'provider'      => $request->provider,
-                    'kode_provider' => $request->kode_provider,
-                    'google_id'     => $googleId,
-                    'id_rental'     => $idRental,
-                ]);
-            
-                return redirect()->route('user.profile', $googleId)
-                ->with('success', 'Metode pembayaran berhasil ditambahkan.');
-                }
-            
-                public function edit($id)
-                {
-                    $user = Auth::user();
-                
-                    $wallet = Wallet_M::where('id_wallet', $id)
-                        ->where('google_id', $user->google_id)
-                        ->firstOrFail();
-                
-                    $providers = [
-                        'GOPAY'     => 'GoPay',
-                        'OVO'       => 'OVO',
-                        'DANA'      => 'DANA',
-                        'SHOPEEPAY' => 'ShopeePay',
-                        'LINKAJA'   => 'LinkAja',
-                    ];
-                
-                    return view('wallet.edit', compact('wallet', 'providers'));
-                }
-                
-                public function update(Request $request, $id)
-                {
-                    $user = Auth::user();
-                
-                    $wallet = Wallet_M::where('id_wallet', $id)
-                        ->where('google_id', $user->google_id)
-                        ->firstOrFail();
-                
-                    $validated = $request->validate([
-                        'provider'      => 'required|string|max:100',
-                        'kode_provider' => 'required|string|max:100',
-                    ]);
-                
-                    $wallet->update($validated);
-                
-                    return redirect()->route('user.profile', $user->google_id)
-                        ->with('success', 'Metode pembayaran berhasil diperbarui.');
-                }
-                
-                public function destroy($id)
-                {
-                    $user = Auth::user();
-                
-                    $wallet = Wallet_M::where('id_wallet', $id)
-                        ->where('google_id', $user->google_id)
-                        ->firstOrFail();
-                
-                    $wallet->delete();
-                
-                    return redirect()->route('user.profile', $user->google_id)
-                        ->with('success', 'Metode pembayaran berhasil dihapus.');
-                }
+    public function create()
+    {
+        $providers = [
+            'GOPAY' => 'GoPay',
+            'OVO' => 'OVO',
+            'DANA' => 'DANA',
+            'SHOPEEPAY' => 'ShopeePay',
+            'LINKAJA' => 'LinkAja',
+        ];
 
-                public function tariktunai(Request $request)
+        return view('wallet.create', compact('providers'));
+    }
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'provider' => 'required|string',
+            'kode_provider' => 'required|string',
+        ]);
+
+        $googleId = auth()->user()->google_id; // atau sesuai auth guard kamu
+        $idRental = session('id_rental'); // pastikan sudah disimpan sebelumnya
+
+        Wallet_M::create([
+            'provider'      => $request->provider,
+            'kode_provider' => $request->kode_provider,
+            'google_id'     => $googleId,
+            'id_rental'     => $idRental,
+        ]);
+
+        return redirect()->route('user.profile', $googleId)
+            ->with('success', 'Metode pembayaran berhasil ditambahkan.');
+    }
+
+    public function edit($id)
+    {
+        $user = Auth::user();
+
+        $wallet = Wallet_M::where('id_wallet', $id)
+            ->where('google_id', $user->google_id)
+            ->firstOrFail();
+
+        $providers = [
+            'GOPAY'     => 'GoPay',
+            'OVO'       => 'OVO',
+            'DANA'      => 'DANA',
+            'SHOPEEPAY' => 'ShopeePay',
+            'LINKAJA'   => 'LinkAja',
+        ];
+
+        return view('wallet.edit', compact('wallet', 'providers'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        $wallet = Wallet_M::where('id_wallet', $id)
+            ->where('google_id', $user->google_id)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'provider'      => 'required|string|max:100',
+            'kode_provider' => 'required|string|max:100',
+        ]);
+
+        $wallet->update($validated);
+
+        return redirect()->route('user.profile', $user->google_id)
+            ->with('success', 'Metode pembayaran berhasil diperbarui.');
+    }
+
+    public function destroy($id)
+    {
+        $user = Auth::user();
+
+        $wallet = Wallet_M::where('id_wallet', $id)
+            ->where('google_id', $user->google_id)
+            ->firstOrFail();
+
+        $wallet->delete();
+
+        return redirect()->route('user.profile', $user->google_id)
+            ->with('success', 'Metode pembayaran berhasil dihapus.');
+    }
+
+    public function tariktunai(Request $request)
     {
         $user = Auth::user();
 
@@ -147,36 +147,32 @@ class Wallet extends Controller
 
 
     public function updateStatus(Request $request, $id)
-{
-    $walletLog = WalletLogs_M::findOrFail($id);
-    $walletLog->status = $request->status;
-    $walletLog->save();
+    {
+        $walletLog = WalletLogs_M::findOrFail($id);
+        $walletLog->status = $request->status;
+        $walletLog->save();
 
-    if ($request->status === 'ditolak') {
-        // Insert/update ke tabel penolakan
-        Penolakan_M::updateOrCreate(
-            ['id_wallet_logs' => $id],
-            ['keterangan' => $request->alasan]
-        );
+        if ($request->status === 'ditolak') {
+            // Insert/update ke tabel penolakan
+            Penolakan_M::updateOrCreate(
+                ['id_wallet_logs' => $id],
+                ['keterangan' => $request->alasan]
+            );
 
-        // Kembalikan amount ke balance user
-        // Asumsi: $walletLog punya relasi ke user, misal $walletLog->user_id
-        // Jika tidak ada, sesuaikan relasi nya
-        $userWallet = UserWallet_M::where('id_rental', $walletLog->id_rental)->first();
+            // Kembalikan amount ke balance user
+            // Asumsi: $walletLog punya relasi ke user, misal $walletLog->user_id
+            // Jika tidak ada, sesuaikan relasi nya
+            $userWallet = UserWallet_M::where('id_rental', $walletLog->id_rental)->first();
 
-        if ($userWallet) {
-            $userWallet->balance += $walletLog->amount;
-            $userWallet->save();
+            if ($userWallet) {
+                $userWallet->balance += $walletLog->amount;
+                $userWallet->save();
+            }
+        } else {
+            // Kalau status bukan ditolak, hapus record penolakan yang terkait (optional)
+            Penolakan_M::where('id_wallet_logs', $id)->delete();
         }
-    } else {
-        // Kalau status bukan ditolak, hapus record penolakan yang terkait (optional)
-        Penolakan_M::where('id_wallet_logs', $id)->delete();
+
+        return redirect()->back()->with('success', 'Status berhasil diperbarui.');
     }
-
-    return redirect()->back()->with('success', 'Status berhasil diperbarui.');
 }
-
-
-
-        }
-        

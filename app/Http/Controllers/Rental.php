@@ -126,7 +126,11 @@ public function index()
                 }
             }
         }
-        return redirect()->route('rental.index')->with('success', 'Tunggu kelanjutannya nya di whatsapp anda');
+if (auth()->user()->role === 'admin') {
+    return redirect()->route('rental.index')->with('success', 'Tunggu kelanjutannya nya di whatsapp anda');
+} else {
+    return redirect()->route('dashboard')->with('success', 'Tunggu kelanjutannya nya di whatsapp anda');
+}
     }
 
     public function edit($id)
@@ -143,19 +147,29 @@ public function index()
 
     // Jika hanya ingin update status
     if ($request->has('status')) {
-        $request->validate([
-            'status' => 'required|in:aktif,off',
-        ]);
+    $request->validate([
+        'status' => 'required|in:aktif,off',
+    ]);
 
-        $rental->update(['status' => $request->status]);
+    $isAktifBaru = $request->status === 'aktif' && $rental->status !== 'aktif';
 
-        // Jika request dari AJAX, bisa return JSON
-        if ($request->ajax()) {
-            return response()->json(['success' => true, 'message' => 'Status berhasil diperbarui']);
-        }
+    $rental->update(['status' => $request->status]);
 
-        return redirect()->back()->with('success', 'Status rental berhasil diperbarui!');
+    // Cek jika pertama kali diaktifkan
+    if ($isAktifBaru) {
+        // Ubah role user menjadi admin berdasarkan google_id dari rental
+        \App\Models\User::where('google_id', $rental->google_id)
+            ->update(['role' => 'admin']);
     }
+
+    // Jika request dari AJAX, return JSON
+    if ($request->ajax()) {
+        return response()->json(['success' => true, 'message' => 'Status berhasil diperbarui']);
+    }
+
+    return redirect()->back()->with('success', 'Status rental berhasil diperbarui!');
+}
+
 
     // Validasi data lengkap
     $validatedData = $request->validate([

@@ -65,10 +65,10 @@
                     <div class="fw-semibold mb-1">Dibayar Pada</div>
                     @php $paidAt = data_get($tripayData, 'paid_at'); @endphp
                     @if($paidAt && is_numeric($paidAt))
-                        <div class="small text-muted">{{ \Carbon\Carbon::createFromTimestamp($paidAt)->translatedFormat('l, d-m-Y') }}</div>
-                        <div class="small text-muted">{{ \Carbon\Carbon::createFromTimestamp($paidAt)->format('H:i:s') }}</div>
+                    <div class="small text-muted">{{ \Carbon\Carbon::createFromTimestamp($paidAt)->translatedFormat('l, d-m-Y') }}</div>
+                    <div class="small text-muted">{{ \Carbon\Carbon::createFromTimestamp($paidAt)->format('H:i:s') }}</div>
                     @else
-                        <div class="small text-muted">-</div>
+                    <div class="small text-muted">-</div>
                     @endif
                 </li>
                 <li class="d-flex justify-content-between py-1 border-bottom">
@@ -82,13 +82,13 @@
             </ul>
 
             @if(!empty(optional($transaksi->pembayaran)->checkout_url))
-<a href="{{ $transaksi->pembayaran->checkout_url }}" target="_blank" rel="noopener"
-   class="btn btn-outline-info shadow-sm d-inline-flex align-items-center gap-1 py-1 px-3"
-   style="font-size: 0.875rem;">
-    <i class="bi bi-receipt fs-5"></i> 
-    <span>Lihat Detail</span>
-</a>
-@endif
+            <a href="{{ $transaksi->pembayaran->checkout_url }}" target="_blank" rel="noopener"
+                class="btn btn-outline-info shadow-sm d-inline-flex align-items-center gap-1 py-1 px-3"
+                style="font-size: 0.875rem;">
+                <i class="bi bi-receipt fs-5"></i>
+                <span>Lihat Detail</span>
+            </a>
+            @endif
 
         </div>
     </div>

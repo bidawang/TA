@@ -103,11 +103,18 @@ class View extends Controller
 
     // Ambil saldo dompet user
     $userWallet = null;
-    if ($googleId) {
-        $userWallet = UserWallet_M::where('google_id', $googleId)
-                                  ->where('id_rental', $id)
-                                  ->first();
-    }
+if ($googleId) {
+    $userWallet = UserWallet_M::firstOrCreate(
+        [
+            'google_id' => $googleId,
+            'id_rental' => $id
+        ],
+        [
+            'balance' => 0 // nilai default jika belum ada
+        ]
+    );
+}
+
 
     // Ambil log dompet
     $walletLogs = WalletLogs_M::where('id_rental', $id)

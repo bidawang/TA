@@ -21,7 +21,7 @@
             @if($setRental->status == 'dipakai')
             <label class="form-label">Waktu Mulai</label>
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="start_option" id="selesaiRadio{{ $setRental->id }}" value="selesai" >
+              <input class="form-check-input" type="radio" name="start_option" id="selesaiRadio{{ $setRental->id }}" value="selesai">
               <label class="form-check-label" for="selesaiRadio{{ $setRental->id }}">
                 Setelah pemain saat ini selesai
               </label>
@@ -42,13 +42,13 @@
                   <select name="manual_hour" class="form-select" required>
                     @for ($i = 0; $i <= 23; $i++)
                       <option value="{{ sprintf('%02d', $i) }}">{{ sprintf('%02d', $i) }}</option>
-                    @endfor
+                      @endfor
                   </select>
                   <span class="input-group-text">:</span>
                   <select name="manual_minute" class="form-select" required>
                     @for ($i = 0; $i <= 55; $i+=5)
                       <option value="{{ sprintf('%02d', $i) }}">{{ sprintf('%02d', $i) }}</option>
-                    @endfor
+                      @endfor
                   </select>
                 </div>
               </div>
@@ -60,7 +60,7 @@
 
           <div class="mb-3">
             <label class="form-label">Jumlah Jam</label>
-            <input type="number" name="jumlah_jam" min="1" class="form-control jumlah-jam"
+            <input type="number" name="jumlah_jam" min="1" class="form-control jumlah-jam" min="0"
               data-id="booking{{ $setRental->id }}" data-harga="{{ $setRental->harga_per_jam }}">
           </div>
 
@@ -79,11 +79,11 @@
             <select name="payment_method" class="form-select select2-modal" required>
               <option value="">Pilih metode pembayaran</option>
               @foreach ($tripayChannels as $channel)
-                @if ($channel['active'])
-                  <option value="{{ $channel['code'] }}" data-icon="{{ $channel['icon_url'] }}">
-                    {{ $channel['name'] }} - {{ $channel['group'] }}
-                  </option>
-                @endif
+              @if ($channel['active'])
+              <option value="{{ $channel['code'] }}" data-icon="{{ $channel['icon_url'] }}">
+                {{ $channel['name'] }} - {{ $channel['group'] }}
+              </option>
+              @endif
               @endforeach
             </select>
           </div>

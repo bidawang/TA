@@ -5,14 +5,14 @@
     <h1>Edit Rental dan Alamat</h1>
 
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <strong>Terjadi kesalahan saat mengisi formulir:</strong>
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
+    <div class="alert alert-danger">
+        <strong>Terjadi kesalahan saat mengisi formulir:</strong>
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
     @endif
 
     <form action="{{ route('rental.update', $rental->id) }}" method="POST" enctype="multipart/form-data">
@@ -41,10 +41,10 @@
             <label for="logo" class="form-label">Logo (Opsional)</label>
             <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
             @if ($rental->logo)
-                <div class="mt-3">
-                    <label>Logo Saat Ini</label><br>
-                    <img src="{{ asset('storage/' . $rental->logo) }}" alt="Logo" style="max-width: 200px;">
-                </div>
+            <div class="mt-3">
+                <label>Logo Saat Ini</label><br>
+                <img src="{{ asset('storage/' . $rental->logo) }}" alt="Logo" style="max-width: 200px;">
+            </div>
             @endif
         </div>
 
@@ -119,7 +119,7 @@
 </div>
 
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('.select2').select2();
 
         // Toggle alamat
@@ -138,9 +138,9 @@
             url: 'https://api.goapi.io/regional/provinsi?api_key=c4ec9697-2589-5b14-d981-5c35d458',
             method: 'GET',
             dataType: 'json',
-            success: function (data) {
+            success: function(data) {
                 let options = '<option value="">Pilih Provinsi</option>';
-                (data.data || []).forEach(function (provinsi) {
+                (data.data || []).forEach(function(provinsi) {
                     options += `<option value="${provinsi.id}|${provinsi.name}">${provinsi.name}</option>`;
                 });
                 $('#provinsi').html(options);
@@ -148,12 +148,12 @@
         });
 
         // Load Kota saat Provinsi berubah
-        $('#provinsi').change(function () {
+        $('#provinsi').change(function() {
             var provinsiId = $(this).val().split('|')[0];
             $('#kota').html('<option value="">Pilih Kota</option>');
-            $.get(`https://api.goapi.io/regional/kota?provinsi_id=${provinsiId}&api_key=c4ec9697-2589-5b14-d981-5c35d458`, function (data) {
+            $.get(`https://api.goapi.io/regional/kota?provinsi_id=${provinsiId}&api_key=c4ec9697-2589-5b14-d981-5c35d458`, function(data) {
                 let options = '<option value="">Pilih Kota</option>';
-                (data.data || []).forEach(function (kota) {
+                (data.data || []).forEach(function(kota) {
                     options += `<option value="${kota.id}|${kota.name}">${kota.name}</option>`;
                 });
                 $('#kota').html(options);
@@ -161,12 +161,12 @@
         });
 
         // Load Kecamatan saat Kota berubah
-        $('#kota').change(function () {
+        $('#kota').change(function() {
             var kotaId = $(this).val().split('|')[0];
             $('#kecamatan').html('<option value="">Pilih Kecamatan</option>');
-            $.get(`https://api.goapi.io/regional/kecamatan?kota_id=${kotaId}&api_key=c4ec9697-2589-5b14-d981-5c35d458`, function (data) {
+            $.get(`https://api.goapi.io/regional/kecamatan?kota_id=${kotaId}&api_key=c4ec9697-2589-5b14-d981-5c35d458`, function(data) {
                 let options = '<option value="">Pilih Kecamatan</option>';
-                (data.data || []).forEach(function (kecamatan) {
+                (data.data || []).forEach(function(kecamatan) {
                     options += `<option value="${kecamatan.id}|${kecamatan.name}">${kecamatan.name}</option>`;
                 });
                 $('#kecamatan').html(options);
@@ -174,12 +174,12 @@
         });
 
         // Load Kelurahan saat Kecamatan berubah
-        $('#kecamatan').change(function () {
+        $('#kecamatan').change(function() {
             var kecamatanId = $(this).val().split('|')[0];
             $('#kelurahan').html('<option value="">Pilih Kelurahan</option>');
-            $.get(`https://api.goapi.io/regional/kelurahan?kecamatan_id=${kecamatanId}&api_key=c4ec9697-2589-5b14-d981-5c35d458`, function (data) {
+            $.get(`https://api.goapi.io/regional/kelurahan?kecamatan_id=${kecamatanId}&api_key=c4ec9697-2589-5b14-d981-5c35d458`, function(data) {
                 let options = '<option value="">Pilih Kelurahan</option>';
-                (data.data || []).forEach(function (kelurahan) {
+                (data.data || []).forEach(function(kelurahan) {
                     options += `<option value="${kelurahan.id}|${kelurahan.name}">${kelurahan.name}</option>`;
                 });
                 $('#kelurahan').html(options);
