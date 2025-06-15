@@ -27,12 +27,12 @@
     <div class="tab-content" id="transaksiTabContent">
         {{-- Non-Booking Tab --}}
         <div class="tab-pane fade show active" id="nonbooking" role="tabpanel">
-            @include('Riwayat.filter', ['transaksi' => $transaksi->where('jenis', 'bukan'), 'transaksiTripay' => $transaksiTripay])
+            @include('riwayat.filter', ['transaksi' => $transaksi->where('jenis', 'bukan'), 'transaksiTripay' => $transaksiTripay])
         </div>
 
         {{-- Booking Tab --}}
         <div class="tab-pane fade" id="booking" role="tabpanel">
-            @include('Riwayat.filter', ['transaksi' => $transaksi->where('jenis', 'booking'), 'transaksiTripay' => $transaksiTripay])
+            @include('riwayat.filter', ['transaksi' => $transaksi->where('jenis', 'booking'), 'transaksiTripay' => $transaksiTripay])
         </div>
     </div>
 </div>

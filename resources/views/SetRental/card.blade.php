@@ -149,8 +149,8 @@
   </div>
 
   {{-- Modal --}}
-  @include('SetRental.pakai', ['setRental' => $setRental, 'rental_id' => $rental_id])
-  @include('SetRental.booking', ['setRental' => $setRental, 'rental_id' => $rental_id, 'tripayChannels' => $tripayChannels])
+  @include('setrental.pakai', ['setRental' => $setRental, 'rental_id' => $rental_id])
+  @include('setrental.booking', ['setRental' => $setRental, 'rental_id' => $rental_id, 'tripayChannels' => $tripayChannels])
 
   {{-- Detail Modal --}}
   <div class="modal fade" id="detailModal{{ $setRental->id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ $setRental->id }}" aria-hidden="true">

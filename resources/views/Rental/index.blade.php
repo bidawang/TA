@@ -38,12 +38,12 @@
     <div class="tab-content" id="rentalTabsContent">
         {{-- Aktif --}}
         <div class="tab-pane fade show active" id="aktif" role="tabpanel">
-            @include('Rental.partial', ['rentals' => $rentalsAktif])
+            @include('rental.partial', ['rentals' => $rentalsAktif])
         </div>
 
         {{-- Nonaktif --}}
         <div class="tab-pane fade" id="off" role="tabpanel">
-            @include('Rental.partial', ['rentals' => $rentalsOff])
+            @include('rental.partial', ['rentals' => $rentalsOff])
         </div>
     </div>
 </div>

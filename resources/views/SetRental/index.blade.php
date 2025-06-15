@@ -38,7 +38,7 @@
 <div class="tab-pane fade " id="dipakai" role="tabpanel">
   <div class="row g-3">
     @foreach ($setRentals->where('status', 'dipakai') as $setRental)
-      @include('SetRental.card', compact('setRental', 'rental_id', 'tripayChannels'))
+      @include('setrental.card', compact('setRental', 'rental_id', 'tripayChannels'))
     @endforeach
   </div>
 </div>
@@ -46,7 +46,7 @@
 <div class="tab-pane fade show active" id="tidak" role="tabpanel">
   <div class="row g-3">
     @foreach ($setRentals->where('status', 'tidak') as $setRental)
-      @include('SetRental.card', compact('setRental', 'rental_id', 'tripayChannels'))
+      @include('setrental.card', compact('setRental', 'rental_id', 'tripayChannels'))
     @endforeach
   </div>
 </div>
@@ -54,7 +54,7 @@
 <div class="tab-pane fade" id="maintenance" role="tabpanel">
   <div class="row g-3">
     @foreach ($setRentals->where('status', 'maintenance') as $setRental)
-      @include('SetRental.card', compact('setRental', 'rental_id', 'tripayChannels'))
+      @include('setrental.card', compact('setRental', 'rental_id', 'tripayChannels'))
     @endforeach
   </div>
 </div>
