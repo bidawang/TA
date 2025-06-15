@@ -9,6 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class Fasilitas extends Controller
 {
+    public function __construct()
+{
+    $this->middleware(function ($request, $next) {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'developer'])) {
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak.');
+        }
+        return $next($request);
+    });
+}
+
     public function index(Request $request)
     {
         // Mengambil rental_id dari query string

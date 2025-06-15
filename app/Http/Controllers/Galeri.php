@@ -8,6 +8,15 @@ use App\Models\Rental_M;
 
 class Galeri extends Controller
 {
+        public function __construct()
+{
+    $this->middleware(function ($request, $next) {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'developer'])) {
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak.');
+        }
+        return $next($request);
+    });
+}
     public function index(Request $request)
     {
         $rental_id = $request->query('rental_id'); // Mengambil rental_id dari query string URL

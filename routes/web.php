@@ -35,6 +35,8 @@ Route::post('/logout', [Google::class, 'logout'])->name('logout');
 Route::post('/callback/tripay', [Tripay::class, 'handle'])->name('tripay.callback');
 Route::resource('rental', Rental::class);
 Route::resource('setrental', SetRental::class);
+
+
 Route::middleware(['auth', 'phone.verified'])->group(function () {
 Route::put('/setrental/selesai/{id}', [SetRental::class, 'selesai'])->name('setrental.selesai');
 Route::resource('fasilitas', Fasilitas::class);

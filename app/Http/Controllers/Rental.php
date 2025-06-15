@@ -11,55 +11,66 @@ use Illuminate\Support\Facades\Auth;
 
 class Rental extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            // Pengecualian: method yang bebas diakses
+            $exceptMethods = ['dashboard', 'show', 'create', 'store'];
+
+            // Cek nama method saat ini
+            $currentMethod = $request->route()->getActionMethod();
+
+            if (!in_array($currentMethod, $exceptMethods)) {
+                if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'developer'])) {
+                    return redirect()->route('dashboard')->with('error', 'Akses ditolak.');
+                }
+            }
+
+            return $next($request);
+        });
+    }
+
     public function dashboard(Request $request)
-{
-    $query = Rental_M::with(['alamat', 'ratings'])
-        ->where('status', 'aktif');
+    {
+        $query = Rental_M::with(['alamat', 'ratings'])
+            ->where('status', 'aktif');
 
-    if (!empty($request->search)) {
-        $query->where('nama', 'like', '%' . $request->search . '%');
+        if (!empty($request->search)) {
+            $query->where('nama', 'like', '%' . $request->search . '%');
+        }
+
+        // Tambahkan withAvg agar ratings_avg_rating tersedia
+        $rentals = $query->withAvg('ratings', 'rating')->get();
+
+        $topRentals = Rental_M::withAvg('ratings', 'rating')
+            ->orderByDesc('ratings_avg_rating')
+            ->take(5)
+            ->get();
+
+        return view('welcome', compact('rentals', 'topRentals'));
     }
 
-    // Tambahkan withAvg agar ratings_avg_rating tersedia
-    $rentals = $query->withAvg('ratings', 'rating')->get();
-
-    $topRentals = Rental_M::withAvg('ratings', 'rating')
-        ->orderByDesc('ratings_avg_rating')
-        ->take(5)
-        ->get();
-
-    return view('welcome', compact('rentals', 'topRentals'));
-}
 
 
+    public function index()
+    {
+        // Ambil rental aktif dan nonaktif dengan relasi alamat dan rata-rata rating
+        $rentalsAktif = Rental_M::with(['alamat'])
+            ->withAvg('ratings', 'rating')
+            ->where('status', 'aktif')
+            ->get();
 
-public function index()
-{
-    // Ambil data rental aktif dan off dengan relasi alamat dan rating
-    $rentalsAktif = Rental_M::with(['alamat', 'ratings'])
-        ->where('status', 'aktif')
-        ->get();
+        $rentalsOff = Rental_M::with(['alamat'])
+            ->withAvg('ratings', 'rating')
+            ->where('status', 'off')
+            ->get();
 
-    $rentalsOff = Rental_M::with(['alamat', 'ratings'])
-        ->where('status', 'off')
-        ->get();
+        // Ambil 3 rental aktif dengan rating tertinggi
+        $topRentals = $rentalsAktif->sortByDesc('ratings_avg_rating')->take(3);
 
-    // Tambahkan properti rata-rata rating ke setiap rental aktif
-    foreach ($rentalsAktif as $rental) {
-        $rental->ratings_avg_rating = $rental->averageRating() ?? 0;
+        return view('rental.index', compact('rentalsAktif', 'rentalsOff', 'topRentals'));
     }
 
-    // Tambahkan properti rating juga ke rental off (opsional)
-    foreach ($rentalsOff as $rental) {
-        $rental->ratings_avg_rating = $rental->averageRating() ?? 0;
-    }
-
-    // Ambil 3 rental aktif dengan rating tertinggi
-    $topRentals = $rentalsAktif->sortByDesc('ratings_avg_rating')->take(3);
-
-    // Kirim data ke view
-    return view('rental.index', compact('rentalsAktif', 'rentalsOff', 'topRentals'));
-}
 
 
     public function create()
@@ -112,7 +123,7 @@ public function index()
             'google_id' => Auth::user()->google_id,
 
         ]);
-        
+
         if ($request->has('provider') && $request->has('kode_provider')) {
             foreach ($request->provider as $index => $provider) {
                 $kodeProvider = $request->kode_provider[$index] ?? null;
@@ -126,151 +137,151 @@ public function index()
                 }
             }
         }
-if (auth()->user()->role === 'admin') {
-    return redirect()->route('rental.index')->with('success', 'Tunggu kelanjutannya nya di whatsapp anda');
-} else {
-    return redirect()->route('dashboard')->with('success', 'Tunggu kelanjutannya nya di whatsapp anda');
-}
+        if (auth()->user()->role === 'admin') {
+            return redirect()->route('rental.index')->with('success', 'Tunggu kelanjutannya nya di whatsapp anda');
+        } else {
+            return redirect()->route('dashboard')->with('success', 'Tunggu kelanjutannya nya di whatsapp anda');
+        }
     }
 
     public function edit($id)
     {
         $rental = Rental_M::with('alamat')->findOrFail($id);
 
-        
+
         return view('rental.edit', compact('rental'));
     }
 
     public function update(Request $request, $id)
-{
-    $rental = Rental_M::findOrFail($id);
+    {
+        $rental = Rental_M::findOrFail($id);
 
-    // Jika hanya ingin update status
-    if ($request->has('status')) {
-    $request->validate([
-        'status' => 'required|in:aktif,off',
-    ]);
+        // Jika hanya ingin update status
+        if ($request->has('status')) {
+            $request->validate([
+                'status' => 'required|in:aktif,off',
+            ]);
 
-    $isAktifBaru = $request->status === 'aktif' && $rental->status !== 'aktif';
+            $isAktifBaru = $request->status === 'aktif' && $rental->status !== 'aktif';
 
-    $rental->update(['status' => $request->status]);
+            $rental->update(['status' => $request->status]);
 
-    // Cek jika pertama kali diaktifkan
-    if ($isAktifBaru) {
-        // Ubah role user menjadi admin berdasarkan google_id dari rental
-        \App\Models\User::where('google_id', $rental->google_id)
-            ->update(['role' => 'admin']);
-    }
+            // Cek jika pertama kali diaktifkan
+            if ($isAktifBaru) {
+                // Ubah role user menjadi admin berdasarkan google_id dari rental
+                \App\Models\User::where('google_id', $rental->google_id)
+                    ->update(['role' => 'admin']);
+            }
 
-    // Jika request dari AJAX, return JSON
-    if ($request->ajax()) {
-        return response()->json(['success' => true, 'message' => 'Status berhasil diperbarui']);
-    }
+            // Jika request dari AJAX, return JSON
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Status berhasil diperbarui']);
+            }
 
-    return redirect()->back()->with('success', 'Status rental berhasil diperbarui!');
-}
-
-
-    // Validasi data lengkap
-    $validatedData = $request->validate([
-        'nama' => 'required|string|max:255',
-        'nik' => 'required|string|max:255',
-        'deskripsi' => 'nullable|string',
-        'logo' => 'nullable|file|image|max:2048',
-    ]);
-
-    // Jika edit_alamat dicentang, validasi juga data alamat
-    if ($request->has('edit_alamat')) {
-        $request->validate([
-            'alamat_lengkap' => 'required|string|max:255',
-            'provinsi' => 'required|string',
-            'kota' => 'required|string',
-            'kecamatan' => 'required|string',
-            'kelurahan' => 'required|string',
-            'rt' => 'required|string|max:5',
-            'rw' => 'required|string|max:5',
-            'kode_pos' => 'required|string|max:10',
-        ]);
-    }
-
-    // Update data utama
-    $rental->update([
-        'nama' => $validatedData['nama'],
-        'nik' => $validatedData['nik'],
-        'deskripsi' => $validatedData['deskripsi'] ?? null,
-    ]);
-
-    // Update logo jika ada file baru
-    if ($request->hasFile('logo')) {
-        if ($rental->logo && Storage::disk('public')->exists($rental->logo)) {
-            Storage::disk('public')->delete($rental->logo);
+            return redirect()->back()->with('success', 'Status rental berhasil diperbarui!');
         }
-        $logoPath = $request->file('logo')->store('logos', 'public');
-        $rental->update(['logo' => $logoPath]);
-    }
 
-    // Jika edit_alamat dicentang, update alamat
-    if ($request->has('edit_alamat')) {
-        $alamat = $rental->alamat;
-        $alamat->update([
-            'alamat_lengkap' => $request->alamat_lengkap,
-            'provinsi' => $request->provinsi,
-            'kota' => $request->kota,
-            'kecamatan' => $request->kecamatan,
-            'kelurahan' => $request->kelurahan,
-            'rt' => $request->rt,
-            'rw' => $request->rw,
-            'kode_pos' => $request->kode_pos,
+
+        // Validasi data lengkap
+        $validatedData = $request->validate([
+            'nama' => 'required|string|max:255',
+            'nik' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'logo' => 'nullable|file|image|max:2048',
         ]);
-    }
 
-    return redirect()->route('rental.index')->with('success', 'Rental berhasil diperbarui!');
-}
+        // Jika edit_alamat dicentang, validasi juga data alamat
+        if ($request->has('edit_alamat')) {
+            $request->validate([
+                'alamat_lengkap' => 'required|string|max:255',
+                'provinsi' => 'required|string',
+                'kota' => 'required|string',
+                'kecamatan' => 'required|string',
+                'kelurahan' => 'required|string',
+                'rt' => 'required|string|max:5',
+                'rw' => 'required|string|max:5',
+                'kode_pos' => 'required|string|max:10',
+            ]);
+        }
+
+        // Update data utama
+        $rental->update([
+            'nama' => $validatedData['nama'],
+            'nik' => $validatedData['nik'],
+            'deskripsi' => $validatedData['deskripsi'] ?? null,
+        ]);
+
+        // Update logo jika ada file baru
+        if ($request->hasFile('logo')) {
+            if ($rental->logo && Storage::disk('public')->exists($rental->logo)) {
+                Storage::disk('public')->delete($rental->logo);
+            }
+            $logoPath = $request->file('logo')->store('logos', 'public');
+            $rental->update(['logo' => $logoPath]);
+        }
+
+        // Jika edit_alamat dicentang, update alamat
+        if ($request->has('edit_alamat')) {
+            $alamat = $rental->alamat;
+            $alamat->update([
+                'alamat_lengkap' => $request->alamat_lengkap,
+                'provinsi' => $request->provinsi,
+                'kota' => $request->kota,
+                'kecamatan' => $request->kecamatan,
+                'kelurahan' => $request->kelurahan,
+                'rt' => $request->rt,
+                'rw' => $request->rw,
+                'kode_pos' => $request->kode_pos,
+            ]);
+        }
+
+        return redirect()->route('rental.index')->with('success', 'Rental berhasil diperbarui!');
+    }
 
 
 
     public function showsss($id)
-{
-    // Ambil rental berdasarkan ID yang diberikan beserta alamat dan ratings terkait
-    $rental = Rental_M::with(['alamat', 'ratings'])->findOrFail($id);
+    {
+        // Ambil rental berdasarkan ID yang diberikan beserta alamat dan ratings terkait
+        $rental = Rental_M::with(['alamat', 'ratings'])->findOrFail($id);
 
-    // Hitung rata-rata rating rental
-    $rental->ratings_avg_rating = $rental->averageRating() ?? 0;
+        // Hitung rata-rata rating rental
+        $rental->ratings_avg_rating = $rental->averageRating() ?? 0;
 
-    // Kembalikan data rental ke view 'rental.show'
-    return view('rental.show', compact('rental'));
-}
-
-
-public function show($id)
-{
-    $rental = Rental_M::with(['alamat', 'fasilitas', 'galeri'])->findOrFail($id);
-    $rental->ratings_avg_rating = $rental->ratings()->avg('rating') ?? 0;
-
-    $carousel1 = $rental->fasilitas;
-    $carousel2 = $rental->galeri;
-
-    $user = Auth::user();
-
-    // Ambil semua rating dengan user
-    $allRatings = $rental->ratings()->with('user')->latest()->get();
-
-    // Pisahkan rating user login (jika ada)
-    $userRating = null;
-    $otherRatings = $allRatings;
-
-    if ($user) {
-        $userRating = $allRatings->firstWhere('user_id', $user->google_id);
-        $otherRatings = $allRatings->filter(fn($r) => $r->user_id !== $user->google_id);
+        // Kembalikan data rental ke view 'rental.show'
+        return view('rental.show', compact('rental'));
     }
 
-    // Gabungkan: userRating di atas, sisanya di bawah
-    $ratings = collect();
-    if ($userRating) $ratings->push($userRating);
-    $ratings = $ratings->merge($otherRatings)->take(10); // ambil 10 teratas manual
 
-    return view('rental.show', compact('rental', 'carousel1', 'carousel2', 'ratings', 'userRating'));
-}
+    public function show($id)
+    {
+        $rental = Rental_M::with(['alamat', 'fasilitas', 'galeri'])->findOrFail($id);
+        $rental->ratings_avg_rating = $rental->ratings()->avg('rating') ?? 0;
+
+        $carousel1 = $rental->fasilitas;
+        $carousel2 = $rental->galeri;
+
+        $user = Auth::user();
+
+        // Ambil semua rating dengan user
+        $allRatings = $rental->ratings()->with('user')->latest()->get();
+
+        // Pisahkan rating user login (jika ada)
+        $userRating = null;
+        $otherRatings = $allRatings;
+
+        if ($user) {
+            $userRating = $allRatings->firstWhere('user_id', $user->google_id);
+            $otherRatings = $allRatings->filter(fn($r) => $r->user_id !== $user->google_id);
+        }
+
+        // Gabungkan: userRating di atas, sisanya di bawah
+        $ratings = collect();
+        if ($userRating) $ratings->push($userRating);
+        $ratings = $ratings->merge($otherRatings)->take(10); // ambil 10 teratas manual
+
+        return view('rental.show', compact('rental', 'carousel1', 'carousel2', 'ratings', 'userRating'));
+    }
 
 
     public function destroy($id)

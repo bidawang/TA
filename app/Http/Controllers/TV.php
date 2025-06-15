@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -8,18 +9,27 @@ use App\Models\TV_M;
 
 class TV extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'developer'])) {
+                return redirect()->route('dashboard')->with('error', 'Akses ditolak.');
+            }
+            return $next($request);
+        });
+    }
     public function index()
-{
-    $idRental = session('id_rental');
-    $googleId = Auth::user()->google_id;
+    {
+        $idRental = session('id_rental');
+        $googleId = Auth::user()->google_id;
 
-    $tvList = TV_M::with('setrental')
-                ->where('id_rental', $idRental)
-                 ->where('google_id', $googleId)
-                 ->get();
+        $tvList = TV_M::with('setrental')
+            ->where('id_rental', $idRental)
+            ->where('google_id', $googleId)
+            ->get();
 
-    return view('tv.index', compact('tvList'));
-}
+        return view('tv.index', compact('tvList'));
+    }
 
 
     public function create()

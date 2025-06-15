@@ -121,11 +121,16 @@
         </div>
 
         <!-- Submit -->
-        <div class="text-end">
-            <button type="submit" class="btn btn-primary px-4">
-                <i class="bi bi-save"></i> Simpan Data
-            </button>
-        </div>
+        <div class="d-flex justify-content-between align-items-center mt-4">
+    <a href="https://wa.me/6285668947486" target="_blank" class="btn btn-outline-success">
+        <i class="bi bi-whatsapp"></i> Kontak Developer
+    </a>
+
+    <button type="submit" class="btn btn-primary px-4">
+        <i class="bi bi-save"></i> Simpan Data
+    </button>
+</div>
+
     </form>
 </div>
 

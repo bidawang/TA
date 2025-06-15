@@ -12,18 +12,27 @@ use Illuminate\Http\Request;
 
 class PS extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'developer'])) {
+                return redirect()->route('dashboard')->with('error', 'Akses ditolak.');
+            }
+            return $next($request);
+        });
+    }
     public function index()
-{
-    $idRental = session('id_rental');
-    $googleId = Auth::user()->google_id;
+    {
+        $idRental = session('id_rental');
+        $googleId = Auth::user()->google_id;
 
-    $psList = PS_M::with('setrental') // <--- ini penting
-                ->where('id_rental', $idRental)
-                ->where('google_id', $googleId)
-                ->get();
+        $psList = PS_M::with('setrental') // <--- ini penting
+            ->where('id_rental', $idRental)
+            ->where('google_id', $googleId)
+            ->get();
 
-    return view('ps.index', compact('psList'));
-}
+        return view('ps.index', compact('psList'));
+    }
 
 
     public function create()
@@ -59,34 +68,34 @@ class PS extends Controller
     }
 
     public function show($id)
-{
-    // Cari PS berdasarkan ID
-    $ps = PS_M::findOrFail($id);
+    {
+        // Cari PS berdasarkan ID
+        $ps = PS_M::findOrFail($id);
 
-    // Ambil platform berdasarkan nama PS
-    $platform = Platform_M::where('name', $ps->model_ps)->first();
-    // Ambil game yang sudah dimiliki PS ini
-    $ownedGames = Storage_M::where('id_ps', $ps->id)->with('game')->get();
-    $ownedGameIds = $ownedGames->pluck('id_game'); // ini penting
-    // Cek jika platform ditemukan
-    if ($platform) {
-        // Ambil semua ID game berdasarkan platform ini
-        $gameIds = GamePS_M::where('platform_id', $platform->id)->pluck('game_id');
-        
-        // Ambil data game berdasarkan ID dan exclude game yang sudah dimiliki
-        $games = Game_M::whereIn('game_id', $gameIds)
-        ->whereNotIn('id', $ownedGameIds)
-            ->orderBy('name')
-            ->get();
-            
-        // Debug (opsional)
-        // dd($games);
-    } else {
-        $games = collect(); // Kosong jika platform tidak ditemukan
+        // Ambil platform berdasarkan nama PS
+        $platform = Platform_M::where('name', $ps->model_ps)->first();
+        // Ambil game yang sudah dimiliki PS ini
+        $ownedGames = Storage_M::where('id_ps', $ps->id)->with('game')->get();
+        $ownedGameIds = $ownedGames->pluck('id_game'); // ini penting
+        // Cek jika platform ditemukan
+        if ($platform) {
+            // Ambil semua ID game berdasarkan platform ini
+            $gameIds = GamePS_M::where('platform_id', $platform->id)->pluck('game_id');
+
+            // Ambil data game berdasarkan ID dan exclude game yang sudah dimiliki
+            $games = Game_M::whereIn('game_id', $gameIds)
+                ->whereNotIn('id', $ownedGameIds)
+                ->orderBy('name')
+                ->get();
+
+            // Debug (opsional)
+            // dd($games);
+        } else {
+            $games = collect(); // Kosong jika platform tidak ditemukan
+        }
+
+        return view('ps.show', compact('ps', 'games', 'ownedGames'));
     }
-
-    return view('ps.show', compact('ps', 'games', 'ownedGames'));
-}
 
     public function edit($id)
     {
